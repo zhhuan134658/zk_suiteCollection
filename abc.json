@@ -1,0 +1,17 @@
+{
+  "assets":{
+      "type":"command",
+      "command":{
+          "cmd":[
+              "tnpm ii",
+              "npm run dist",
+              "mv ./dist $BUILD_DEST"
+          ]
+      },
+      "ignore":[
+          "node_modules",
+          "build",
+          "dist"
+      ]
+  }
+}

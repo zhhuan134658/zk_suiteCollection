@@ -1,0 +1,46 @@
+{
+  "name": "multi-components",
+  "version": "1.1.0",
+  "description": "",
+  "private": true,
+  "main": "\\",
+  "scripts": {
+    "clean": "rm -rf node_modules ./packages/*/node_modules",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "version": "ts-node ./scripts/version.ts",
+    "bootstrap": "npx lerna bootstrap",
+    "build": "npx lerna run build && npm run dist",
+    "dist": "ts-node ./scripts/dist.ts",
+    "swap": "ts-node ./scripts/swap.ts",
+    "lerna-changed": "npx lerna changed",
+    "lerna-version": "npx lerna version"
+  },
+  "author": "",
+  "license": "ISC",
+  "workspaces": [
+    "packages/*",
+    "components/*"
+  ],
+  "packages": [
+    "packages/*",
+    "components/*"
+  ],
+  "devDependencies": {
+    "@types/fs-extra": "^9.0.12",
+    "chalk": "^4.1.2",
+    "colors": "^1.4.0",
+    "execa": "^5.1.1",
+    "fs-extra": "^10.0.0",
+    "globby": "^11",
+    "ice-npm-utils": "^2.1.2",
+    "lerna": "^4.0.0",
+    "ts-node": "^10.2.1",
+    "typescript": "^4.3.5"
+  },
+  "engines": {
+    "install-node": "12.22.11"
+  },
+  "dependencies": {
+    "@ali/dingtalk-jsapi": "^2.13.93"
+  }
+}

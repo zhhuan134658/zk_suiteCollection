@@ -1,0 +1,26 @@
+{
+  "compileOnSave": false,
+  "buildOnSave": false,
+  "compilerOptions": {
+    "outDir": "build",
+    "module": "esnext",
+    "target": "es5",
+    "jsx": "react",
+    "moduleResolution": "node",
+    "lib": ["es5", "dom"],
+    "sourceMap": true,
+    "allowJs": true,
+    "noUnusedLocals": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    "skipLibCheck": true,
+    "rootDir": "./.debug",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [".debug/*"]
+    }
+  },
+  "include": [".debug/**/*.ts", ".debug/**/*.tsx"],
+  "exclude": ["node_modules", "build", "public"]
+}
