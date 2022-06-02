@@ -7,8 +7,8 @@ export default {
   "description": "筑快OA 2.0测试版本DEMO_Rest",
   "icon": "",
   "props": {
-    "bizType": "isv.zhukuai.warehousing",
-    "bizAlias": "isv.zhukuai.warehousing",
+    "bizType": "isv.zhukuai.zkgl",
+    "bizAlias": "isv.zhukuai.zkgl",
     "extract": true,
     "isThirdSuite": true
   },

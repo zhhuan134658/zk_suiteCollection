@@ -69,13 +69,13 @@ const Suite = createReactClass({
   render() {
     if (this.suiteRender) {
       return (
-        <div className="isvzhukuaiwarehousing">
+        <div className="isvzhukuaizkoatiaoshi">
           {this.suiteRender()}
         </div>);
     }
 
     return (
-      <div className="isvzhukuaiwarehousing">
+      <div className="isvzhukuaizkoatiaoshi">
         <div className="pc-runtime-wrap">
           {this.props.form.getFields().map(field => {
             if (field.props.commonBizType === 'SelectProField' || field.props.commonBizType === 'SelectPro') {

@@ -410,6 +410,9 @@ const FormField: ISwapFormField = {
         hanmoney: 0,
         detailedData: [], //物资明细
       };
+      if (this.state.Inputmoney1) {
+        editData.hanmoney = Number(this.state.Inputmoney1);
+      }
       editData.detailedData = this.state.materialList;
       // 打印数据
       const newlistdata = this.state.materialList;
