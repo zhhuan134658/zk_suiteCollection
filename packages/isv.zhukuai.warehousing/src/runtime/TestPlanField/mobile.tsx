@@ -269,13 +269,13 @@ const FormField: ISwapFormField = {
         console.log('0000009');
         const dataArray = _this.state.materialList;
         dataArray[index][types] = e;
-        const row = dataArray[index];
-        const key = types;
-        const data = handleSaveTaxTable(_this, dataArray, row, key);
+        // const row = dataArray[index];
+        // const key = types;
+        // const data = handleSaveTaxTable(_this, dataArray, row, key);
         _this.setState({
-          materialList: [...data],
+          materialList: [...dataArray],
         });
-        handleTaxTableStatistics(_this, data);
+        // handleTaxTableStatistics(_this, data);
       },
       handleAddVisible(visible: boolean) {
         _this.setState({
@@ -603,13 +603,13 @@ const FormField: ISwapFormField = {
                                             this,
                                             index,
                                           )}
-                                          onChange={e =>
-                                            this.methods().onInputchange(
-                                              'name',
-                                              index,
-                                              e,
-                                            )
-                                          }
+                                        //   onChange={e =>
+                                        //     this.methods().onInputchange(
+                                        //       'name',
+                                        //       index,
+                                        //       e,
+                                        //     )
+                                        //   }
                                         />
                                       </div>
                                     </div>

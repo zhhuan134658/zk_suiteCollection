@@ -1,5 +1,5 @@
 import React from "react";
-import SwapDemoSuite from "@/src/runtime/mobile";
+import SwapDemoSuite from "../src/runtime/mobile";
 import createReactClass from "create-react-class";
 import SelectProField from "./SelectProField/mobile";
 import SelectProtwoField from "./SelectProtwoField/mobile";
@@ -68,10 +68,7 @@ const Suite = createReactClass({
   },
   render() {
     if (this.suiteRender) {
-      return (
-        <div className="isvzhukuaiwarehousing">
-          {this.suiteRender()}
-        </div>);
+      return this.suiteRender();
     }
 
     return (

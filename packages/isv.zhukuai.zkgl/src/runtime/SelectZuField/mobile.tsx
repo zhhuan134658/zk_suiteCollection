@@ -41,6 +41,8 @@ const FormField: ISwapFormField = {
         _this.setState({ inputvalue: '' });
         form.setFieldValue('Zumoney', '');
         form.setFieldExtendValue('Zumoney', '');
+        form.setFieldValue('SelectZu', '');
+        form.setFieldExtendValue('SelectZu', '');
       },
       handleClick(item: any) {
         const { form } = _this.props;
@@ -67,9 +69,16 @@ const FormField: ISwapFormField = {
     const _this = this;
     const promise = asyncSetProps(_this, data, 'SelectZu', 'lease_settlement');
     promise.then(res => {
-      _this.setState({
-        listData: [...res.dataArray],
-      });
+      const dataArray = res.dataArray;
+      if (dataArray.length === 0) {
+        _this.setState({ inputvalue: '暂无合同' });
+        _this.props.form.setFieldValue('SelectZu', '暂无合同');
+        _this.props.form.setFieldExtendValue('SelectZu', '暂无合同');
+      } else {
+        _this.setState({
+          listData: [...res.dataArray],
+        });
+      }
     });
   },
   fieldDidUpdate() {

@@ -1,3 +1,5 @@
+import 'dingtalk-jsapi/entry/union';
+import * as dd from 'dingtalk-jsapi'; // 此方式为整体加载，也可按需进行加载
 import React from 'react';
 import { Table, Tooltip, Modal, Input, Button, Pagination } from 'antd';
 import { CloseCircleOutlined } from '@ant-design/icons';
@@ -33,6 +35,27 @@ const myColumns = [
       <Tooltip placement="topLeft" title={record.bankofdeposit}>
         <span>{record.bankofdeposit}</span>
       </Tooltip>
+    ),
+  },
+  {
+    title: '操作',
+    dataIndex: 'operation',
+
+    render: (_, record: any) => (
+      <a
+        onClick={() =>
+          dd.ready(() => {
+            dd.biz.util.openSlidePanel({
+              url: 'www.baidu.com', //打开侧边栏的url
+              title: '详情', //侧边栏顶部标题
+              onSuccess: function (result) {},
+              onFail: function () {},
+            });
+          })
+        }
+      >
+        查看详情
+      </a>
     ),
   },
 ];
@@ -248,7 +271,9 @@ const FormField: ISwapFormField = {
               scroll={{ y: '255px' }}
               onRow={record => {
                 return {
-                  onClick: this.methods().rowClick.bind(this, record),
+                  onClick: event => {
+                    this.methods().rowClick.bind(this, record);
+                  },
                 };
               }}
               rowKey={record => record.id}

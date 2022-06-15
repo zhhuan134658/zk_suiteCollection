@@ -1,3 +1,5 @@
+import 'dingtalk-jsapi/entry/union';
+import * as dd from 'dingtalk-jsapi'; // 此方式为整体加载，也可按需进行加载
 import React from 'react';
 import {
   notification,
@@ -32,21 +34,7 @@ import { uniqueArrayByKey } from '../../utils/normalizeUtils';
 const { Search } = Input;
 const myColumns = [
   {
-    title: (
-      <div>
-        名称
-        {/* <Tooltip
-          placement="top"
-          title={
-            <div>
-              <span>灰色字体为已关联过选项</span>
-            </div>
-          }
-        >
-          <QuestionCircleOutlined />
-        </Tooltip> */}
-      </div>
-    ),
+    title: <div>名称</div>,
     dataIndex: 'name',
     render: (_, record: any) => {
       const text = record.xuan === 1 ? '#000000' : '#000000';
@@ -63,6 +51,27 @@ const myColumns = [
   {
     title: '项目名称',
     dataIndex: 'project_name',
+  },
+  {
+    title: '操作',
+    dataIndex: 'operation',
+
+    render: (_, record: any) => (
+      <a
+        onClick={() =>
+          dd.ready(() => {
+            dd.biz.util.openSlidePanel({
+              url: record.url, //打开侧边栏的url
+              title: '详情', //侧边栏顶部标题
+              onSuccess: function (result) {},
+              onFail: function () {},
+            });
+          })
+        }
+      >
+        查看详情
+      </a>
+    ),
   },
 ];
 
@@ -94,6 +103,7 @@ const treeDiagramColumns = [
 const FormField: ISwapFormField = {
   getInitialState() {
     return {
+      infourl: '',
       detailPage: 1,
       defaultActiveKey: 'a',
       value: undefined,
@@ -139,6 +149,16 @@ const FormField: ISwapFormField = {
   methods() {
     const _this = this;
     return {
+      openinfo() {
+        dd.ready(() => {
+          dd.biz.util.openSlidePanel({
+            url: _this.state.infourl, //打开侧边栏的url
+            title: '详情', //侧边栏顶部标题
+            onSuccess: function (result) {},
+            onFail: function () {},
+          });
+        });
+      },
       addNewDetail() {
         _this.setState({
           visibleModal: true,
@@ -387,16 +407,21 @@ const FormField: ISwapFormField = {
         hanmoney: null,
         nomoney: null,
         detailname: '',
+        infourl: '',
         detailedData: [], //物资明细
       };
       if (this.state.Inputmoney1) {
         editData.hanmoney = Number(this.state.Inputmoney1);
+      }
+      if (this.state.infourl) {
+        editData.infourl = this.state.infourl;
       }
       if (this.state.Inputmoney2) {
         editData.nomoney = Number(this.state.Inputmoney2);
       }
       editData.detailname = this.state.detailname;
       editData.detailedData = this.state.dataSource;
+      console.log(editData);
       // 打印数据
       const newlistdata = this.state.dataSource;
       const str2 = this.state.detailname;
@@ -690,6 +715,7 @@ const FormField: ISwapFormField = {
       selectedRowKeys,
       onChange: (selectedRowKeys, selectedRows) => {
         let dtar = '';
+        let url = '';
         let newData = [...selectedRows];
         let newDataid = [];
         if (newData.length > 0) {
@@ -704,11 +730,12 @@ const FormField: ISwapFormField = {
         }
 
         dtar = newData[0] ? newData[0]['name'] : '';
-
+        url = newData[0] ? newData[0]['url'] : '';
         this.setState({
           currentSelectData: newData,
           currentSelectDataid: newDataid,
           detailname: dtar,
+          infourl: url,
         });
         this.setState({ selectedRowKeys });
       },
@@ -738,14 +765,16 @@ const FormField: ISwapFormField = {
       //   if (!value.detailedData) {
       //     value = field.getValue();
       //   }
+      console.log('787878', value);
       const {
+        infourl = '',
         detailname = '',
         hanmoney = 0,
         detailedData = [],
       } = value ? value : {};
       return (
         <div className="field-wrapper">
-          <div className="label" style={{ marginTop: '10px' }}>
+          <div className="label" style={{ marginTop: '10px', color: 'red' }}>
             {label}
           </div>
           <div>{detailname}</div>
@@ -753,12 +782,7 @@ const FormField: ISwapFormField = {
           <div className="label" style={{ marginTop: '10px' }}>
             {label}
           </div>
-
-          {/* <div>
-                      {detailedData.map(item => {
-                        return <div>{item.toString()}</div>;
-                      })}
-                    </div> */}
+          <div>{infourl}</div>
           <div>
             <Table
               scroll={{ x: '1500px' }}
@@ -898,7 +922,6 @@ const FormField: ISwapFormField = {
               }}
             />
             <Table
-              scroll={{ x: '1500px' }}
               rowSelection={{
                 type: 'radio',
                 ...rowSelection,

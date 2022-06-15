@@ -1,4 +1,4 @@
-import FormField from '@/src/runtime/SelectConField/mobile';
+import FormField from '../../src/runtime/SelectConField/mobile';
 import createReactClass from 'create-react-class';
   
 const Field = createReactClass({

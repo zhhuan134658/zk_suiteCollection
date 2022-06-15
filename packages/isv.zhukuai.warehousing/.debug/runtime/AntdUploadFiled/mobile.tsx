@@ -1,4 +1,4 @@
-import FormField from '@/src/runtime/AntdUploadFiled/mobile';
+import FormField from '../../src/runtime/AntdUploadFiled/mobile';
 import createReactClass from 'create-react-class';
   
 const Field = createReactClass({

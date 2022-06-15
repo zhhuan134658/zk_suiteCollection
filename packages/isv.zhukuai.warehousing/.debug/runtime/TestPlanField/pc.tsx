@@ -1,4 +1,4 @@
-import FormField from '@/src/runtime/TestPlanField/pc';
+import FormField from '../../src/runtime/TestPlanField/pc';
 import createReactClass from 'create-react-class';
   
 const Field = createReactClass({

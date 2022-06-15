@@ -1,5 +1,5 @@
 import React from "react";
-import SwapDemoSuite from "@/src/runtime/pc";
+import SwapDemoSuite from "../src/runtime/pc";
 import createReactClass from "create-react-class";
 import SelectProField from "./SelectProField/pc";
 import SelectProtwoField from "./SelectProtwoField/pc";
@@ -68,10 +68,7 @@ const Suite = createReactClass({
   },
   render() {
     if (this.suiteRender) {
-      return (
-        <div className="isvzhukuaiwarehousing">
-          {this.suiteRender()}
-        </div>);
+      return this.suiteRender();
     }
 
     return (
