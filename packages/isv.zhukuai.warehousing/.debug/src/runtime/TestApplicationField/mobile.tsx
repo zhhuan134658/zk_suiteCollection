@@ -1,4 +1,6 @@
 //import { Tree } from 'antd';
+import 'dingtalk-jsapi/entry/union';
+import * as dd from 'dingtalk-jsapi';
 import { Drawer, InputItem, SearchBar, Toast } from 'antd-mobile';
 import React from 'react';
 import { createPortal } from 'react-dom';
@@ -23,6 +25,7 @@ const now = new Date();
 const FormField: ISwapFormField = {
   getInitialState() {
     return {
+      infourl: '',
       updateTreeDate: '1',
       activeKey: '',
       datadate: '',
@@ -121,7 +124,7 @@ const FormField: ISwapFormField = {
     return {
       ResetClick() {
         _this.setState({
-          detailname: '',
+          chenkdata: '',
           Inputmoney2: 0,
           Inputmoney1: 0,
           materialList: [
@@ -250,6 +253,7 @@ const FormField: ISwapFormField = {
         _this.asyncSetFieldProps(newdate, 1);
         _this.setState({
           chenkdata: dtar,
+          infourl: item.url,
           showElem3: 'none',
         });
       },
@@ -301,7 +305,7 @@ const FormField: ISwapFormField = {
         const list = _this.state.materialList;
         if (list.length === 1) {
           return _this.setState({
-            detailname: '',
+            chenkdata: '',
             Inputmoney2: 0,
             Inputmoney1: 0,
             materialList: [
@@ -449,19 +453,23 @@ const FormField: ISwapFormField = {
         hanmoney: null,
         nomoney: null,
         detailname: '',
+        infourl: '',
         detailedData: [], //物资明细
       };
       if (this.state.Inputmoney1) {
         editData.hanmoney = Number(this.state.Inputmoney1);
       }
+      if (this.state.infourl) {
+        editData.infourl = this.state.infourl;
+      }
       if (this.state.Inputmoney2) {
         editData.nomoney = Number(this.state.Inputmoney2);
       }
-      editData.detailname = this.state.detailname;
+      editData.detailname = this.state.chenkdata;
       editData.detailedData = this.state.materialList;
       // 打印数据
       const newlistdata = this.state.materialList;
-      const str2 = this.state.detailname;
+      const str2 = this.state.chenkdata;
       const str1 = ' 合计(元):' + this.state.Inputmoney1;
       const str =
         str2 + parsePrintString(newlistdata, applicationColumns, str1);
@@ -626,9 +634,35 @@ const FormField: ISwapFormField = {
       //   if (!value.detailedData) {
       //     value = field.getValue();
       //   }
-      const { hanmoney = 0, detailedData = [] } = value ? value : {};
+      const {
+        infourl = '',
+        detailname = '',
+        hanmoney = 0,
+        detailedData = [],
+      } = value ? value : {};
       return (
         <div className="field-wrapper">
+          <div className="field-wrapper">
+            <div className="m-field-view">
+              <label className="m-field-view-label">
+                <span
+                  style={{ color: '#409eff' }}
+                  onClick={() =>
+                    dd.ready(() => {
+                      dd.biz.util.openLink({
+                        url: infourl, //打开侧边栏的url
+                      });
+                    })
+                  }
+                >
+                  {label}
+                </span>
+              </label>
+              <div className="m-field-view-value">
+                <span>{detailname}</span>
+              </div>
+            </div>
+          </div>
           <div className="tablefield-mobile">
             <div className="tbody-row-wrap">
               {detailedData.map((item, index) => {

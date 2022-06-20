@@ -1,5 +1,5 @@
 import 'dingtalk-jsapi/entry/union';
-import * as dd from 'dingtalk-jsapi'; // 此方式为整体加载，也可按需进行加载
+import * as dd from 'dingtalk-jsapi';
 import React from 'react';
 import {
   notification,
@@ -149,16 +149,6 @@ const FormField: ISwapFormField = {
   methods() {
     const _this = this;
     return {
-      openinfo() {
-        dd.ready(() => {
-          dd.biz.util.openSlidePanel({
-            url: _this.state.infourl, //打开侧边栏的url
-            title: '详情', //侧边栏顶部标题
-            onSuccess: function (result) {},
-            onFail: function () {},
-          });
-        });
-      },
       addNewDetail() {
         _this.setState({
           visibleModal: true,
@@ -212,6 +202,7 @@ const FormField: ISwapFormField = {
       iconClick() {
         _this.setState({
           detailname: '',
+          infourl: '',
           dataSource: [],
           Inputmoney2: 0,
           Inputmoney1: 0,
@@ -767,22 +758,36 @@ const FormField: ISwapFormField = {
       //   }
       console.log('787878', value);
       const {
-        // infourl = '',
+        infourl = '',
         detailname = '',
         hanmoney = 0,
         detailedData = [],
       } = value ? value : {};
       return (
         <div className="field-wrapper">
-          <div className="label" style={{ marginTop: '10px', color: 'red' }}>
+          <div className="label" style={{ marginTop: '10px' }}>
             {label}
           </div>
-          <div>{detailname}</div>
+          <div
+            style={{ color: '#409eff' }}
+            onClick={() =>
+              dd.ready(() => {
+                dd.biz.util.openSlidePanel({
+                  url: infourl, //打开侧边栏的url
+                  title: '详情', //侧边栏顶部标题
+                  onSuccess: function (result) {},
+                  onFail: function () {},
+                });
+              })
+            }
+          >
+            {detailname}
+          </div>
 
           <div className="label" style={{ marginTop: '10px' }}>
             {label}
           </div>
-          {/* <div>{infourl}</div> */}
+
           <div>
             <Table
               scroll={{ x: '1500px' }}

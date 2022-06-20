@@ -1,4 +1,7 @@
 //重构完成
+import 'dingtalk-jsapi/entry/union';
+import * as dd from 'dingtalk-jsapi'; // 此方式为整体加载，也可按需进行加载
+
 import React from 'react';
 import {
   Tabs,
@@ -70,6 +73,27 @@ const mycolumnsa = [
     title: '合同金额',
     dataIndex: 'contract_money',
   },
+  {
+    title: '操作',
+    dataIndex: 'operation',
+
+    render: (_, record: any) => (
+      <a
+        onClick={() =>
+          dd.ready(() => {
+            dd.biz.util.openSlidePanel({
+              url: record.url, //打开侧边栏的url
+              title: '详情', //侧边栏顶部标题
+              onSuccess: function (result) {},
+              onFail: function () {},
+            });
+          })
+        }
+      >
+        查看详情
+      </a>
+    ),
+  },
 ];
 const mycolumnsb = [
   {
@@ -109,6 +133,27 @@ const mycolumnsb = [
     title: '订单金额',
     dataIndex: 'tax_total_money',
   },
+  {
+    title: '操作',
+    dataIndex: 'operation',
+
+    render: (_, record: any) => (
+      <a
+        onClick={() =>
+          dd.ready(() => {
+            dd.biz.util.openSlidePanel({
+              url: record.url, //打开侧边栏的url
+              title: '详情', //侧边栏顶部标题
+              onSuccess: function (result) {},
+              onFail: function () {},
+            });
+          })
+        }
+      >
+        查看详情
+      </a>
+    ),
+  },
 ];
 const mycolumnsc = [
   {
@@ -139,6 +184,27 @@ const mycolumnsc = [
         </Tooltip>
       );
     },
+  },
+  {
+    title: '操作',
+    dataIndex: 'operation',
+
+    render: (_, record: any) => (
+      <a
+        onClick={() =>
+          dd.ready(() => {
+            dd.biz.util.openSlidePanel({
+              url: record.url, //打开侧边栏的url
+              title: '详情', //侧边栏顶部标题
+              onSuccess: function (result) {},
+              onFail: function () {},
+            });
+          })
+        }
+      >
+        查看详情
+      </a>
+    ),
   },
 ];
 const mycolumnsd = [
@@ -175,6 +241,27 @@ const mycolumnsd = [
     title: '采购金额',
     dataIndex: 'detailed_money',
   },
+  {
+    title: '操作',
+    dataIndex: 'operation',
+
+    render: (_, record: any) => (
+      <a
+        onClick={() =>
+          dd.ready(() => {
+            dd.biz.util.openSlidePanel({
+              url: record.url, //打开侧边栏的url
+              title: '详情', //侧边栏顶部标题
+              onSuccess: function (result) {},
+              onFail: function () {},
+            });
+          })
+        }
+      >
+        查看详情
+      </a>
+    ),
+  },
 ];
 
 const treeDiagramColumns = [
@@ -205,6 +292,7 @@ const treeDiagramColumns = [
 const FormField: ISwapFormField = {
   getInitialState() {
     return {
+      infourl: '',
       detailPage: 1,
       defaultActiveKey: 'a',
       value: undefined,
@@ -302,6 +390,7 @@ const FormField: ISwapFormField = {
       },
       iconClick() {
         _this.setState({
+          infourl: '',
           detailname: '',
           dataSource: [],
           Inputmoney2: 0,
@@ -486,10 +575,14 @@ const FormField: ISwapFormField = {
       console.log('发起页：fieldDidUpdate');
       const editData = {
         hanmoney: 0,
+        infourl: '',
         nomoney: 0,
         detailname: '',
         detailedData: [], //物资明细
       };
+      if (this.state.infourl) {
+        editData.infourl = this.state.infourl;
+      }
       if (this.state.Inputmoney1) {
         editData.hanmoney = Number(this.state.Inputmoney1);
       }
@@ -914,6 +1007,7 @@ const FormField: ISwapFormField = {
       selectedRowKeys,
       onChange: (selectedRowKeys, selectedRows) => {
         let dtar = '';
+        let url = '';
         let newData = [...selectedRows];
         let newDataid = [];
         if (newData.length > 0) {
@@ -936,6 +1030,7 @@ const FormField: ISwapFormField = {
         } else if (this.state.detdate === 'd1') {
           dtar = '采购申请-' + (newData[0] ? newData[0]['name'] : '');
         }
+        url = newData[0] ? newData[0]['url'] : '';
         form.setFieldValue(
           'Selectjia',
           newData[0] ? newData[0]['supplier'] : '',
@@ -948,6 +1043,7 @@ const FormField: ISwapFormField = {
           currentSelectData: newData,
           currentSelectDataid: newDataid,
           detailname: dtar,
+          infourl: url,
         });
         this.setState({ selectedRowKeys });
       },
@@ -977,6 +1073,7 @@ const FormField: ISwapFormField = {
       //     value = field.getValue();
       //   }
       const {
+        infourl = '',
         detailname = '',
         nomoney = 0,
         hanmoney = 0,
@@ -987,7 +1084,21 @@ const FormField: ISwapFormField = {
           <div className="label" style={{ marginTop: '10px' }}>
             {label}
           </div>
-          <div>{detailname}</div>
+          <div
+            style={{ color: '#409eff' }}
+            onClick={() =>
+              dd.ready(() => {
+                dd.biz.util.openSlidePanel({
+                  url: infourl, //打开侧边栏的url
+                  title: '详情', //侧边栏顶部标题
+                  onSuccess: function (result) {},
+                  onFail: function () {},
+                });
+              })
+            }
+          >
+            {detailname}
+          </div>
 
           <div className="label" style={{ marginTop: '10px' }}>
             {label}

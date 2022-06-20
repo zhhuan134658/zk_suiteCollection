@@ -1,4 +1,6 @@
 //重构完成
+import 'dingtalk-jsapi/entry/union';
+import * as dd from 'dingtalk-jsapi';
 import React from 'react';
 import {
   notification,
@@ -49,6 +51,27 @@ const myColumns = [
     title: '提交时间',
     dataIndex: 'created',
   },
+  {
+    title: '操作',
+    dataIndex: 'operation',
+
+    render: (_, record: any) => (
+      <a
+        onClick={() =>
+          dd.ready(() => {
+            dd.biz.util.openSlidePanel({
+              url: record.url, //打开侧边栏的url
+              title: '详情', //侧边栏顶部标题
+              onSuccess: function (result) {},
+              onFail: function () {},
+            });
+          })
+        }
+      >
+        查看详情
+      </a>
+    ),
+  },
 ];
 
 const treeDiagramColumns = [
@@ -79,6 +102,7 @@ const treeDiagramColumns = [
 const FormField: ISwapFormField = {
   getInitialState() {
     return {
+      infourl: '',
       detailPage: 1,
       defaultActiveKey: 'a',
       value: undefined,
@@ -157,6 +181,7 @@ const FormField: ISwapFormField = {
       },
       iconClick() {
         _this.setState({
+          infourl: '',
           detailname: '',
           dataSource: [],
           Inputmoney2: 0,
@@ -444,6 +469,7 @@ const FormField: ISwapFormField = {
       const { form } = this.props;
       const editData = {
         hanmoney: 0,
+        infourl: '',
         nomoney: 0,
         detailname: '',
         detailedData: [], //物资明细
@@ -456,7 +482,9 @@ const FormField: ISwapFormField = {
         form.setFieldValue('ZuJieMoney', Number(this.state.Inputmoney1));
         form.setFieldExtendValue('ZuJieMoney', Number(this.state.Inputmoney1));
       }
-
+      if (this.state.infourl) {
+        editData.infourl = this.state.infourl;
+      }
       editData.detailname = this.state.detailname;
       editData.detailedData = this.state.dataSource;
       const newlistdata = this.state.dataSource;
@@ -760,6 +788,7 @@ const FormField: ISwapFormField = {
       selectedRowKeys,
       onChange: (selectedRowKeys, selectedRows) => {
         let dtar = '';
+        let url = '';
         let newData = [...selectedRows];
         console.log('newData', newData);
         let newDataid = [];
@@ -775,6 +804,7 @@ const FormField: ISwapFormField = {
         }
         if (this.state.detdate === 'a1') {
           dtar = newData[0] ? newData[0]['name'] : '';
+          url = newData[0] ? newData[0]['url'] : '';
         }
         form.setFieldExtendValue(
           'Selectjia',
@@ -789,6 +819,7 @@ const FormField: ISwapFormField = {
           currentSelectData: newData,
           currentSelectDataid: newDataid,
           detailname: dtar,
+          infourl: url,
         });
         this.setState({ selectedRowKeys });
       },
@@ -824,6 +855,7 @@ const FormField: ISwapFormField = {
       //   value = field.getValue();
       // }
       const {
+        infourl = '',
         detailname = '',
         nomoney = 0,
         hanmoney = 0,
@@ -834,7 +866,21 @@ const FormField: ISwapFormField = {
           <div className="label" style={{ marginTop: '10px' }}>
             {label}
           </div>
-          <div>{detailname}</div>
+          <div
+            style={{ color: '#409eff' }}
+            onClick={() =>
+              dd.ready(() => {
+                dd.biz.util.openSlidePanel({
+                  url: infourl, //打开侧边栏的url
+                  title: '详情', //侧边栏顶部标题
+                  onSuccess: function (result) {},
+                  onFail: function () {},
+                });
+              })
+            }
+          >
+            {detailname}
+          </div>
 
           <div className="label" style={{ marginTop: '10px' }}>
             {label}

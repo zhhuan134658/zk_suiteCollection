@@ -603,13 +603,13 @@ const FormField: ISwapFormField = {
                                             this,
                                             index,
                                           )}
-                                          //   onChange={e =>
-                                          //     this.methods().onInputchange(
-                                          //       'name',
-                                          //       index,
-                                          //       e,
-                                          //     )
-                                          //   }
+                                        //   onChange={e =>
+                                        //     this.methods().onInputchange(
+                                        //       'name',
+                                        //       index,
+                                        //       e,
+                                        //     )
+                                        //   }
                                         />
                                       </div>
                                     </div>

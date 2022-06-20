@@ -1,4 +1,6 @@
 //重构完成
+import 'dingtalk-jsapi/entry/union';
+import * as dd from 'dingtalk-jsapi'; // 此方式为整体加载，也可按需进行加载
 import React from 'react';
 import {
   notification,
@@ -70,6 +72,27 @@ const myColumns = [
     title: '备注',
     dataIndex: 'remarks',
   },
+  {
+    title: '操作',
+    dataIndex: 'operation',
+
+    render: (_, record: any) => (
+      <a
+        onClick={() =>
+          dd.ready(() => {
+            dd.biz.util.openSlidePanel({
+              url: record.url, //打开侧边栏的url
+              title: '详情', //侧边栏顶部标题
+              onSuccess: function (result) {},
+              onFail: function () {},
+            });
+          })
+        }
+      >
+        查看详情
+      </a>
+    ),
+  },
 ];
 
 const treeDiagramColumns = [
@@ -100,6 +123,7 @@ const treeDiagramColumns = [
 const FormField: ISwapFormField = {
   getInitialState() {
     return {
+      infourl: '',
       searchvalue: '',
       detailPage: 1,
       defaultActiveKey: 'a',
@@ -196,6 +220,7 @@ const FormField: ISwapFormField = {
       },
       iconClick() {
         _this.setState({
+          infourl: '',
           detailname: '',
           ck_name: '',
           dataSource: [],
@@ -331,6 +356,7 @@ const FormField: ISwapFormField = {
     console.log('cDataid', this.state.currentSelectData);
     this.asyncSetFieldProps(newData);
     this.setState({
+      infourl: allselect[0].url,
       detailname: allselect[0].name,
       ck_name: allselect[0].name,
       isModalVisible: false,
@@ -398,9 +424,13 @@ const FormField: ISwapFormField = {
     if (!this.props.runtimeProps.viewMode) {
       console.log('发起页：fieldDidUpdate');
       const editData = {
+        infourl: '',
         warehouse: '',
         detailedData: [], //物资明细
       };
+      if (this.state.infourl) {
+        editData.infourl = this.state.infourl;
+      }
       editData.warehouse = this.state.detailname;
       editData.detailedData = this.state.dataSource;
       // 打印数据
@@ -664,13 +694,31 @@ const FormField: ISwapFormField = {
       // if (!value.detailedData) {
       //   value = field.getValue();
       // }
-      const { detailname = '', detailedData = [] } = value ? value : {};
+      const {
+        infourl = '',
+        detailname = '',
+        detailedData = [],
+      } = value ? value : {};
       return (
         <div className="field-wrapper">
           <div className="label" style={{ marginTop: '10px' }}>
             {label}
           </div>
-          <div>{detailname}</div>
+          <div
+            style={{ color: '#409eff' }}
+            onClick={() =>
+              dd.ready(() => {
+                dd.biz.util.openSlidePanel({
+                  url: infourl, //打开侧边栏的url
+                  title: '详情', //侧边栏顶部标题
+                  onSuccess: function (result) {},
+                  onFail: function () {},
+                });
+              })
+            }
+          >
+            {detailname}
+          </div>
           <div className="label" style={{ marginTop: '10px' }}>
             {label}
           </div>

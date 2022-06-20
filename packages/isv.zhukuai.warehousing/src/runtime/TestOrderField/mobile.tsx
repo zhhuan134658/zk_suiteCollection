@@ -1,5 +1,7 @@
 //重构完成
 //import { Tree } from 'antd';
+import 'dingtalk-jsapi/entry/union';
+import * as dd from 'dingtalk-jsapi'; // 此方式为整体加载，也可按需进行加载
 import { Drawer, InputItem, SearchBar, Toast } from 'antd-mobile';
 import React from 'react';
 import { createPortal } from 'react-dom';
@@ -24,6 +26,7 @@ const now = new Date();
 const FormField: ISwapFormField = {
   getInitialState() {
     return {
+      infourl: '',
       updateTreeDate: '1',
       activeKey: '',
       datadate: '',
@@ -268,6 +271,7 @@ const FormField: ISwapFormField = {
         form.setFieldExtendValue('Selectjia', item['supplier']);
         _this.setState({
           chenkdata: dtar,
+          infourl: item.url,
           showElem3: 'none',
         });
       },
@@ -429,6 +433,7 @@ const FormField: ISwapFormField = {
       const editData = {
         hanmoney: 0,
         nomoney: 0,
+        infourl: '',
         detailname: '',
         detailedData: [], //物资明细
       };
@@ -440,6 +445,9 @@ const FormField: ISwapFormField = {
           'CaiDingMoney',
           Number(this.state.Inputmoney1),
         );
+      }
+      if (this.state.infourl) {
+        editData.infourl = this.state.infourl;
       }
       if (this.state.Inputmoney2) {
         editData.nomoney = Number(this.state.Inputmoney2);
@@ -674,12 +682,35 @@ const FormField: ISwapFormField = {
       //   value = field.getValue();
       // }
       const {
+        infourl = '',
+        detailname = '',
         hanmoney = 0,
         nomoney = 0,
         detailedData = [],
       } = value ? value : {};
       return (
         <div className="field-wrapper">
+          <div className="field-wrapper">
+            <div className="m-field-view">
+              <label className="m-field-view-label">
+                <span
+                  style={{ color: '#409eff' }}
+                  onClick={() =>
+                    dd.ready(() => {
+                      dd.biz.util.openLink({
+                        url: infourl, //要打开链接的地址
+                      });
+                    })
+                  }
+                >
+                  {label}
+                </span>
+              </label>
+              <div className="m-field-view-value">
+                <span>{detailname}</span>
+              </div>
+            </div>
+          </div>
           <div className="tablefield-mobile">
             <div className="tbody-row-wrap">
               {detailedData.map((item, index) => {

@@ -350,8 +350,7 @@ const FormField: ISwapFormField = {
       if (this.state.Inputmoney1) {
         editData.hanmoney = Number(this.state.Inputmoney1);
       }
-        editData.detailedData = this.state.dataSource;
-        console.log('uli', editData);
+      editData.detailedData = this.state.dataSource;
       // 打印数据
       const newlistdata = this.state.dataSource;
       const str2 = '';
@@ -655,7 +654,7 @@ const FormField: ISwapFormField = {
                   okText="是"
                   cancelText="否"
                 >
-                  <span>重置112明细</span>
+                  <span>重置明细</span>
                 </Popconfirm>
               </div>
             </div>
