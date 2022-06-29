@@ -3,8 +3,8 @@ export default {
   "isSuite": true,
   "componentName": "DDBizSuite",
   "category": "suite_test",
-  "name": "筑快OA 2.0测试版本DEMO_Rest",
-  "description": "筑快OA 2.0测试版本DEMO_Rest",
+  "name": "筑快OA swap-cli2.0",
+  "description": "筑快OA swap-cli2.0",
   "icon": "",
   "props": {
     "bizType": "isv.zhukuai.zkoatiaoshi",

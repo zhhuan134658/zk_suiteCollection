@@ -616,7 +616,7 @@ const FormField: ISwapFormField = {
                                       <div className="m-field-content left">
                                         <div className="input-wrapper">
                                           <InputItem
-                                            type="text"
+                                            type="digit"
                                             className="ant-input m-mobile-inner-input"
                                             value={item.money}
                                             placeholder="请输入"

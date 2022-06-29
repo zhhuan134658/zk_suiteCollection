@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "antd-mobile-v5": "npm:antd-mobile",
+    "dingtalk-jsapi": "^2.14.2",
     "dingtalk-swap-cli": "^2.0.0-beta6",
     "rc-form": "^2.4.12"
   },

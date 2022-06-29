@@ -1,0 +1,642 @@
+import React from 'react';
+import {
+  Table,
+  Tooltip,
+  Modal,
+  Input,
+  Button,
+  Pagination,
+  notification,
+  Tabs,
+} from 'antd';
+import { CloseCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { DataType, ISwapFormField, SimpleData } from '../../types/runtime';
+import { changePage } from '../../utils/pageUtils';
+import { asyncSetProps } from '../../utils/asyncSetProps';
+import { searchBarSubmitRK } from '../../utils/searchUtils';
+import { fpAdd } from '../../utils/fpOperations';
+const { TabPane } = Tabs;
+const { Search } = Input;
+const mycolumnsa = [
+  {
+    title: (
+      <div>
+        结算名称
+        {/* <Tooltip
+          placement="top"
+          title={
+            <div>
+              <span>灰色字体为已关联过选项</span>
+            </div>
+          }
+        >
+          <QuestionCircleOutlined />
+        </Tooltip> */}
+      </div>
+    ),
+    dataIndex: 'name',
+    render: (_, record: any) => {
+      const text = record.xuan === 1 ? '#000000' : '#000000';
+      const style = {
+        color: text,
+      };
+      return (
+        <Tooltip placement="topLeft" title={record.name}>
+          <span style={style}>{record.name}</span>
+        </Tooltip>
+      );
+    },
+  },
+  {
+    title: '租赁单位',
+    dataIndex: 'supplier',
+    render: (_, record: any) => (
+      <Tooltip placement="topLeft" title={record.supplier}>
+        <span>{record.supplier}</span>
+      </Tooltip>
+    ),
+  },
+  {
+    title: '结算金额（取结算中的批复金额）',
+    dataIndex: 'reply_money',
+    render: (_, record: any) => (
+      <Tooltip placement="topLeft" title={record.reply_money}>
+        <span>{record.reply_money}</span>
+      </Tooltip>
+    ),
+  },
+];
+const mycolumnsb = [
+  {
+    title: (
+      <div>
+        合同名称
+        {/* <Tooltip
+          placement="top"
+          title={
+            <div>
+              <span>灰色字体为已关联过选项</span>
+            </div>
+          }
+        >
+          <QuestionCircleOutlined />
+        </Tooltip> */}
+      </div>
+    ),
+    dataIndex: 'name',
+    render: (_, record: any) => {
+      const text = record.xuan === 1 ? '#000000' : '#000000';
+      const style = {
+        color: text,
+      };
+      return (
+        <Tooltip placement="topLeft" title={record.name}>
+          <span style={style}>{record.name}</span>
+        </Tooltip>
+      );
+    },
+  },
+  {
+    title: '租赁单位',
+    dataIndex: 'supplier',
+    render: (_, record: any) => (
+      <Tooltip placement="topLeft" title={record.supplier}>
+        <span>{record.supplier}</span>
+      </Tooltip>
+    ),
+  },
+  {
+    title: '合同金额',
+    dataIndex: 'contract_money',
+    render: (_, record: any) => (
+      <Tooltip placement="topLeft" title={record.contract_money}>
+        <span>{record.contract_money}</span>
+      </Tooltip>
+    ),
+  },
+];
+const mycolumnsc = [
+  {
+    title: (
+      <div>
+        结算名称
+        {/* <Tooltip
+          placement="top"
+          title={
+            <div>
+              <span>灰色字体为已关联过选项</span>
+            </div>
+          }
+        >
+          <QuestionCircleOutlined />
+        </Tooltip> */}
+      </div>
+    ),
+    dataIndex: 'name',
+    render: (_, record: any) => {
+      const text = record.xuan === 1 ? '#000000' : '#000000';
+      const style = {
+        color: text,
+      };
+      return (
+        <Tooltip placement="topLeft" title={record.name}>
+          <span style={style}>{record.name}</span>
+        </Tooltip>
+      );
+    },
+  },
+  {
+    title: '租赁单位',
+    dataIndex: 'extend_first',
+    render: (_, record: any) => (
+      <Tooltip placement="topLeft" title={record.extend_first}>
+        <span>{record.extend_first}</span>
+      </Tooltip>
+    ),
+  },
+  {
+    title: '结算金额',
+    dataIndex: 'detailed_money',
+    render: (_, record: any) => (
+      <Tooltip placement="topLeft" title={record.detailed_money}>
+        <span>{record.detailed_money}</span>
+      </Tooltip>
+    ),
+  },
+];
+const FormField: ISwapFormField = {
+  getInitialState() {
+    return {
+      detailPage: 1,
+      defaultActiveKey: 'a',
+      detdate: 'a1',
+      dstatus: '1',
+      detailname: '',
+      Inputmoney2: '',
+      Inputmoney1: '',
+      current_page: '', //当前页
+      total2: '',
+      allData: {
+        rk_id: ['a'],
+        number: '10',
+        page: '1',
+        name: '',
+      },
+      isModalVisible: false,
+      isModalVisibletree: false,
+      listData: [],
+
+      treeData: [],
+      pagination: {
+        current: 1,
+        pageSize: 10,
+      },
+
+      loading: false,
+      leaveLongVal: '',
+
+      //   dataSource: [],
+      dataSource: [],
+      count: 1,
+
+      currentEditId: 0,
+      currentSelectData: [],
+      currentSelectDataid: [],
+      selectedRowKeys: [],
+    };
+  },
+  methods() {
+    const _this = this;
+    return {
+      handleSearch(value: any) {
+        const newData = _this.state.allData;
+        const defaultActiveKey = _this.state.defaultActiveKey;
+        newData.name = value;
+        newData.page = 1;
+        newData.rk_id = [defaultActiveKey];
+        _this.setState({ allData: newData });
+        _this.asyncSetFieldProps(newData);
+      },
+      handleChangePage(page: any) {
+        changePage(_this, page);
+      },
+      handleRowChange(row: DataType) {
+        _this.setState({
+          currentEditId: row.key,
+        });
+      },
+      handleRowDelete(row: any) {
+        const dataSource = [..._this.state.dataSource];
+        if (row.tax_money) {
+          const newvalue = _this.state.Inputmoney1;
+          _this.setState({
+            Inputmoney1: (newvalue - row.tax_money).toFixed(2),
+          });
+        }
+        if (row.notax_money) {
+          const newvalue2 = _this.state.Inputmoney2;
+          _this.setState({
+            Inputmoney2: (newvalue2 - row.notax_money).toFixed(2),
+          });
+        }
+        _this.setState({
+          dataSource: dataSource.filter(item => item.id !== row.id),
+        });
+      },
+      iconClick() {
+        const { form } = _this.props;
+        _this.setState({ detailname: '' });
+        form.setFieldValue('RegistField', '');
+        form.setFieldExtendValue('RegistField', '');
+      },
+      handleAddNew() {
+        const { form } = _this.props;
+        const value = form.getFieldValue('Autopro');
+        if (value) {
+          const defaultKey = _this.state.defaultActiveKey;
+          _this.setState({ dstatus: '1' });
+          const newPage = {
+            rk_id: [defaultKey],
+            number: '10',
+            page: '1',
+            name: '',
+            project_name: value,
+          };
+          _this.setState({ allData: newPage, isModalVisible: true });
+          _this.asyncSetFieldProps(newPage);
+        } else {
+          notification.open({
+            duration: 2,
+            message: '请先选择项目',
+          });
+        }
+      },
+      handleAdd() {
+        _this.setState({ dstatus: '2' });
+        const newpage = {
+          rk_id: ['-1'],
+          number: '10',
+          page: _this.state.detailPage,
+          name: '',
+        };
+
+        _this.asyncSetFieldProps(newpage);
+        _this.setState({
+          isModalVisibletree: true,
+        });
+      },
+
+      handleSave(row: any) {
+        const newData = _this.state.dataSource;
+        const index = newData.findIndex(
+          (item: SimpleData) => item.id === row.id,
+        );
+        const item = newData[index];
+        newData.splice(index, 1, {
+          ...item,
+          ...row,
+        });
+        if (row.rk_number) {
+          newData[index].tax_money = row.rk_number * row.tax_price;
+        }
+        if (row.tax_rate) {
+          newData[index].notax_price = (
+            row.tax_money *
+            row.tax_rate *
+            0.01
+          ).toFixed(2);
+          newData[index].notax_money = (
+            row.tax_money *
+            (100 - row.tax_rate) *
+            0.01
+          ).toFixed(2);
+        }
+        _this.setState({ dataSource: newData });
+        const newarr1 = [..._this.state.dataSource];
+        let newarr2 = [];
+
+        newarr2 = newarr1.filter(item => {
+          if (item.tax_money) {
+            return item;
+          }
+        });
+        newarr2 = newarr2.map(item => {
+          return item.tax_money;
+        });
+
+        _this.setState({
+          Inputmoney1: newarr2.reduce(fpAdd, 0).toFixed(2),
+        });
+        // 不含税金额合计;
+        const newarr3 = [..._this.state.dataSource];
+        let newarr4 = [];
+
+        newarr4 = newarr3.filter(item => {
+          if (item.notax_money) {
+            return item;
+          }
+        });
+        newarr4 = newarr4.map(item => {
+          return item.notax_money;
+        });
+
+        _this.setState({
+          Inputmoney2: newarr4.reduce(fpAdd, 0).toFixed(2),
+        });
+      },
+      rowClick(record: any) {
+        const { form } = _this.props;
+        const newData = [..._this.state.dataSource];
+        const index = newData.findIndex(
+          item => _this.state.currentEditId === item.id,
+        );
+        const currentKey = newData[index].key;
+        newData[index] = record;
+        newData[index].key = currentKey;
+        _this.setState({ dataSource: newData, isModalVisible: false }, () => {
+          form.setFieldValue('TestRegist', record);
+          form.setFieldExtendValue('TestRegist', record);
+        });
+      },
+    };
+  },
+  handleOk() {
+    this.setState({
+      dstatus: '3',
+      isModalVisible: false,
+      selectedRowKeys: [],
+    });
+  },
+  handleCancel() {
+    this.setState({ isModalVisible: false, selectedRowKeys: [] });
+  },
+  asyncSetFieldProps(data: any) {
+    const _this = this;
+    const bizAlias = 'TestRegist';
+    const promise = asyncSetProps(_this, data, bizAlias, 'ticket_register');
+    promise.then(res => {
+      const dataArray = res.dataArray;
+      if (dataArray.length === 0) {
+        _this.setState({ Inputvalue: '暂无合同' });
+        _this.props.form.setFieldValue('TestRegist', '暂无合同');
+        _this.setState({
+          listData: [],
+          current_page: 1,
+          total2: 0,
+        });
+      } else {
+        _this.setState({
+          listData: dataArray,
+          current_page: res.currentPage,
+          total2: res.totalCount,
+        });
+      }
+    });
+  },
+  fieldDidUpdate() {
+    if (!this.props.runtimeProps.viewMode) {
+      console.log('发起页：fieldDidUpdate');
+      const { form } = this.props;
+      form.setFieldValue('TestRegist', this.state.detailname);
+      form.setFieldExtendValue('TestRegist', this.state.detailname);
+    }
+  },
+
+  fieldRender() {
+    const { form, runtimeProps } = this.props;
+    const { viewMode } = runtimeProps;
+    const field = form.getFieldInstance('TestRegist');
+    const label = form.getFieldProp('TestRegist', 'label');
+    const required = form.getFieldProp('TestRegist', 'required');
+    const { selectedRowKeys } = this.state;
+
+    const Tabschange = key => {
+      console.log(key);
+
+      const newpage = {
+        defaultActiveKey: key,
+        rk_id: [key],
+        number: '10',
+        page: 1,
+        name: '',
+      };
+      this.setState({
+        defaultActiveKey: key,
+        allData: newpage,
+        detdate: key + '1',
+      });
+      this.asyncSetFieldProps(newpage);
+    };
+    const rowSelection = {
+      selectedRowKeys,
+      onChange: (selectedRowKeys, selectedRows) => {
+        // console.log(
+        //   `selectedRowKeys: ${selectedRowKeys}`,
+        //   'selectedRows: ',
+        //   selectedRows,
+        // );
+        let dtar = '';
+        let newData = [...selectedRows];
+        let newDataid = [];
+        if (newData.length > 0) {
+          newData = newData.map(item => {
+            return Object.assign(item, {
+              num: 1,
+            });
+          });
+          newDataid = newData.map(item => {
+            return item.id;
+          });
+        }
+        if (this.state.detdate === 'a1') {
+          dtar = '租赁结算-' + newData[0].name;
+        } else if (this.state.detdate === 'b1') {
+          dtar = '租赁合同-' + newData[0].name;
+        } else if (this.state.detdate === 'c1') {
+          dtar = '机械费结算-' + newData[0].name;
+        }
+        form.setFieldValue('RegistField', newData[0].contract_name);
+        console.log('======' + JSON.stringify(newData));
+        this.setState({ currentSelectData: newData, detailname: dtar });
+        this.setState({ selectedRowKeys });
+      },
+    };
+
+    // 详情页
+    if (viewMode) {
+      const value = field.getExtendValue() ? field.getExtendValue() : '';
+      return (
+        <div className="field-wrapper">
+          <div className="label" style={{ marginTop: '10px' }}>
+            {label}
+          </div>
+          <div style={{ marginTop: '10px' }}> {value}</div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="TestRegistField_class">
+        <div className="pc-custom-field-wrap">
+          <div className="label" style={{ marginTop: '10px' }}>
+            {required ? (
+              <span style={{ color: '#ea6d5c' }}>*</span>
+            ) : (
+              <span style={{ color: '#fff' }}>*</span>
+            )}
+            {label}
+          </div>
+          <div>
+            <Input
+              readOnly
+              value={this.state.detailname}
+              onClick={this.methods().handleAddNew}
+              placeholder="请选择"
+              suffix={
+                <CloseCircleOutlined
+                  onClick={this.methods().iconClick}
+                  style={{ color: 'rgba(0,0,0,.45)' }}
+                />
+              }
+            />
+          </div>
+
+          <Modal className="isvzhukuaizkoatiaoshi" 
+            title="关联"
+            width={1000}
+            visible={this.state.isModalVisible}
+            footer={[
+              <Button key="back" onClick={this.handleCancel}>
+                返回
+              </Button>,
+              <Button
+                key="submit"
+                type="primary"
+                loading={this.state.loading}
+                onClick={this.handleOk}
+              >
+                确定
+              </Button>,
+            ]}
+            onCancel={this.handleCancel}
+          >
+            <Tabs
+              className="Tabs_class"
+              defaultActiveKey="a"
+              centered
+              onChange={Tabschange}
+            >
+              <TabPane tab="租赁合同" key="b">
+                <Search
+                  placeholder="请输入"
+                  allowClear
+                  enterButton="搜索"
+                  size="large"
+                  onSearch={val => {
+                    this.methods().handleSearch(val, 'b');
+                  }}
+                  onChange={e => {
+                    if (e.target.value === '') {
+                      this.methods().handleSearch('', 'b');
+                    }
+                  }}
+                />
+                <Table
+                  scroll={{ x: '1500px' }}
+                  rowSelection={{
+                    type: 'radio',
+                    ...rowSelection,
+                  }}
+                  rowKey={record => record.id}
+                  columns={mycolumnsb}
+                  dataSource={this.state.listData}
+                  loading={this.state.loading}
+                  pagination={false}
+                ></Table>
+                <Pagination
+                  defaultCurrent={1}
+                  total={this.state.total2}
+                  hideOnSinglePage={true}
+                  className="pagination"
+                  onChange={this.onChangepage}
+                />
+              </TabPane>
+              <TabPane tab="租赁结算" key="a">
+                <Search
+                  placeholder="请输入"
+                  allowClear
+                  enterButton="搜索"
+                  size="large"
+                  onSearch={val => {
+                    this.methods().handleSearch(val, 'a');
+                  }}
+                  onChange={e => {
+                    if (e.target.value === '') {
+                      this.methods().handleSearch('', 'a');
+                    }
+                  }}
+                />
+                <Table
+                  scroll={{ x: '1500px' }}
+                  rowSelection={{
+                    type: 'radio',
+                    ...rowSelection,
+                  }}
+                  rowKey={record => record.id}
+                  columns={mycolumnsa}
+                  dataSource={this.state.listData}
+                  loading={this.state.loading}
+                  pagination={false}
+                ></Table>
+                <Pagination
+                  defaultCurrent={1}
+                  total={this.state.total2}
+                  hideOnSinglePage={true}
+                  className="pagination"
+                  onChange={this.onChangepage}
+                />
+              </TabPane>
+              <TabPane tab="机械费结算" key="c">
+                <Search
+                  placeholder="请输入"
+                  allowClear
+                  enterButton="搜索"
+                  size="large"
+                  onSearch={val => {
+                    this.methods().handleSearch(val, 'c');
+                  }}
+                  onChange={e => {
+                    if (e.target.value === '') {
+                      this.methods().handleSearch('', 'c');
+                    }
+                  }}
+                />
+                <Table
+                  scroll={{ x: '1500px' }}
+                  rowSelection={{
+                    type: 'radio',
+                    ...rowSelection,
+                  }}
+                  rowKey={record => record.id}
+                  columns={mycolumnsc}
+                  dataSource={this.state.listData}
+                  loading={this.state.loading}
+                  pagination={false}
+                ></Table>
+                <Pagination
+                  defaultCurrent={1}
+                  total={this.state.total2}
+                  hideOnSinglePage={true}
+                  className="pagination"
+                  onChange={this.onChangepage}
+                />
+              </TabPane>
+            </Tabs>
+          </Modal>
+        </div>
+      </div>
+    );
+  },
+};
+
+export default FormField;

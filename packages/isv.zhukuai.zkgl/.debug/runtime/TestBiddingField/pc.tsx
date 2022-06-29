@@ -1,4 +1,4 @@
-import FormField from '@/src/runtime/TestBiddingField/pc';
+import FormField from '../../src/runtime/TestBiddingField/pc';
 import createReactClass from 'create-react-class';
   
 const Field = createReactClass({

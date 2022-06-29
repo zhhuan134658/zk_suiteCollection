@@ -1,4 +1,4 @@
-import FormField from '@/src/runtime/SelectSpoField/pc';
+import FormField from '../../src/runtime/SelectSpoField/pc';
 import createReactClass from 'create-react-class';
   
 const Field = createReactClass({

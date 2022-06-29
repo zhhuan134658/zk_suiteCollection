@@ -821,6 +821,7 @@ const FormField: ISwapFormField = {
       selectedRowKeys,
       onChange: (selectedRowKeys, selectedRows) => {
         let dtar = '';
+        let url = '';
         let newData = [...selectedRows];
         let newDataid = [];
         if (newData.length > 0) {
@@ -838,7 +839,7 @@ const FormField: ISwapFormField = {
         } else if (this.state.detdate === 'b1') {
           dtar = '材料总计划-' + (newData[0] ? newData[0]['name'] : '');
         }
-
+        url = newData[0] ? newData[0]['url'] : '';
         this.setState({
           currentSelectData: newData,
           currentSelectDataid: newDataid,

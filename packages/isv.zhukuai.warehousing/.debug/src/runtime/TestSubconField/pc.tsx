@@ -415,7 +415,8 @@ const FormField: ISwapFormField = {
             />
           </div>
 
-          <Modal className="isvzhukuaiwarehousing" 
+          <Modal
+            className="isvzhukuaiwarehousing"
             title="关联"
             width={1000}
             visible={this.state.isModalVisible}
@@ -476,7 +477,7 @@ const FormField: ISwapFormField = {
               total={this.state.total2}
               hideOnSinglePage={true}
               className="pagination"
-              onChange={this.methods().handlePageChange}
+              onChange={this.methods().handleChangePage}
             />
           </Modal>
         </div>

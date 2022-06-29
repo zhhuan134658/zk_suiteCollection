@@ -1,4 +1,4 @@
-import FormField from '@/src/runtime/TestMachineryField/mobile';
+import FormField from '../../src/runtime/TestMachineryField/mobile';
 import createReactClass from 'create-react-class';
   
 const Field = createReactClass({

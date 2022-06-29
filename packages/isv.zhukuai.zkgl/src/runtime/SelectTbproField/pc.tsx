@@ -277,7 +277,7 @@ const FormField: ISwapFormField = {
               total={this.state.total2}
               hideOnSinglePage={true}
               className="pagination"
-              onChange={this.methods().handlePageChange}
+              onChange={this.methods().handleChangePage}
             />
           </Modal>
         </div>

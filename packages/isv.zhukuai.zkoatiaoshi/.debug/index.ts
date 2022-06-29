@@ -27,8 +27,6 @@ import notification from 'antd/lib/notification';
   import BizSuiteConfig from './config';
   
   
-
-  
   
   console.warn('swap cli debug mode start');
   
@@ -37,13 +35,11 @@ import notification from 'antd/lib/notification';
     MobileRender,
     BizSuiteConfig,
     
-    
   };
 
   export default {
     PCRender,
     MobileRender,
     BizSuiteConfig,
-    
     
   };
