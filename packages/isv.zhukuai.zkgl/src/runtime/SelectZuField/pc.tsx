@@ -176,7 +176,7 @@ const FormField: ISwapFormField = {
           name: '',
         };
         newpage.rk_id.push(record.id);
-        _this.asyncSetFieldProps(newpage, 1);
+        // _this.asyncSetFieldProps(newpage, 1);
         _this.setState(
           { Inputvalue: record.name, isModalVisible: false },
           () => {

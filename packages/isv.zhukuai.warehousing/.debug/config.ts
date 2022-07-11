@@ -1098,6 +1098,15 @@ export default {
     {
       "componentName": "CommonField",
       "props": {
+        "bizAlias": "TestCdy",
+        "commonBizType": "TestCdyField",
+        "placeholder": "请输入",
+        "label": "cdycehsi"
+      }
+    },
+    {
+      "componentName": "CommonField",
+      "props": {
         "bizAlias": "TestReturn",
         "commonBizType": "TestReturnField",
         "placeholder": "请输入",

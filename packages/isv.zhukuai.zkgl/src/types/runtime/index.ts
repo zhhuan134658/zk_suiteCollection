@@ -8,6 +8,7 @@ interface EditableRowProps {
 
 interface SwapFormField extends IFormField {
   getInitialState: () => any;
+  suiteDidMount?: () => any;
   handleOk: () => void;
   handleCancel: () => void;
   onExtraClick: () => void;

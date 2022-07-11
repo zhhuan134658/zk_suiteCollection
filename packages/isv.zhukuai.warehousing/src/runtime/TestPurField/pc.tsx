@@ -363,7 +363,7 @@ const FormField: ISwapFormField = {
     const promise = asyncSetProps(_this, data, bizAlias, 'material_contract');
     promise
       .then(res => {
-        //console.log('ASYNC', res);
+        console.log('ASYNC', res);
         const treeArray = [
           {
             title: '物资类型',
@@ -895,7 +895,7 @@ const FormField: ISwapFormField = {
               })
             }
           >
-            {detailname}
+            {detailname}dsaadsasdsad
           </div>
 
           <div className="label" style={{ marginTop: '10px' }}>
@@ -954,7 +954,7 @@ const FormField: ISwapFormField = {
                   opacity: 0.15,
                 }}
               >
-                {'Version: 3.1.2'}
+                {'Version: 3.1.3'}
               </div>
               <div style={{ color: '#409EFF', cursor: 'pointer' }}>
                 <Popconfirm
@@ -1032,6 +1032,12 @@ const FormField: ISwapFormField = {
                 placeholder="自动计算"
               />
             </div>
+
+            <div className="label" style={{ marginTop: '10px' }}>
+              cdy-ceshi
+            </div>
+            <Input placeholder="cdy-ceshi" />
+            {/* <div></div> */}
           </div>
 
           <Modal

@@ -39,6 +39,7 @@ import TestMaterialField from "./TestMaterialField/mobile";
 import TestApplicationField from "./TestApplicationField/mobile";
 import TestSetField from "./TestSetField/mobile";
 import TestPurField from "./TestPurField/mobile";
+import TestCdyField from "./TestCdyField/mobile";
 import TestReturnField from "./TestReturnField/mobile";
 import TestExpeField from "./TestExpeField/mobile";
 import TestCinField from "./TestCinField/mobile";
@@ -188,6 +189,9 @@ if (field.props.commonBizType === 'TestSetField' || field.props.commonBizType ==
             }
 if (field.props.commonBizType === 'TestPurField' || field.props.commonBizType === 'TestPur') {
               return <TestPurField {...this.props}  bizAlias={field.props.bizAlias} />;
+            }
+if (field.props.commonBizType === 'TestCdyField' || field.props.commonBizType === 'TestCdy') {
+              return <TestCdyField {...this.props}  bizAlias={field.props.bizAlias} />;
             }
 if (field.props.commonBizType === 'TestReturnField' || field.props.commonBizType === 'TestReturn') {
               return <TestReturnField {...this.props}  bizAlias={field.props.bizAlias} />;
