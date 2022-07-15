@@ -42,6 +42,24 @@ const FormField: ISwapFormField = {
       SetStates: () => {
         this.setState({});
       },
+      openSolidModal: () => {
+        dd.ready(function () {
+          dd.biz.util.openSlidePanel({
+            url: 'about:blank', //打开侧边栏的url
+            title: 'title', //侧边栏顶部标题
+            onSuccess: function (result) {
+              /*
+            调用biz.navigation.quit接口进入onSuccess, result为调用biz.navigation.quit传入的数值
+        */
+            },
+            onFail: function () {
+              /*
+            tips:点击右上角上角关闭按钮会进入onFail
+         */
+            },
+          });
+        });
+      },
     };
   },
   asyncSetFieldProps(data: any) {
@@ -103,6 +121,8 @@ const FormField: ISwapFormField = {
           <div>
             <Input placeholder="testcdy" onChange={this.methods().onChange} />
           </div>
+
+          <div onClick={this.methods().openSolidModal}>打开侧边面板</div>
         </div>
       </div>
     );

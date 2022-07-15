@@ -14,6 +14,15 @@ export default {
   },
   "children": [
     {
+      "componentName": "CommonField",
+      "props": {
+        "bizAlias": "TestCdy",
+        "commonBizType": "TestCdyField",
+        "placeholder": "请输入",
+        "label": "cdycehsi"
+      }
+    },
+    {
       "componentName": "MoneyField",
       "props": {
         "bizAlias": "Moneytest",
@@ -1093,15 +1102,6 @@ export default {
         "commonBizType": "TestPurField",
         "placeholder": "请输入",
         "label": "采购合同"
-      }
-    },
-    {
-      "componentName": "CommonField",
-      "props": {
-        "bizAlias": "TestCdy",
-        "commonBizType": "TestCdyField",
-        "placeholder": "请输入",
-        "label": "cdycehsi"
       }
     },
     {

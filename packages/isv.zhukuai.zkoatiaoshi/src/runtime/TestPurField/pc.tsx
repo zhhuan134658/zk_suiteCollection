@@ -954,7 +954,7 @@ const FormField: ISwapFormField = {
                   opacity: 0.15,
                 }}
               >
-                {'Version: 3.1.3'}
+                {'Version: 3.1.4'}
               </div>
               <div style={{ color: '#409EFF', cursor: 'pointer' }}>
                 <Popconfirm

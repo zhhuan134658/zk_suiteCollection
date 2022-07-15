@@ -1,6 +1,7 @@
 import React from "react";
 import SwapDemoSuite from "../src/runtime/mobile";
 import createReactClass from "create-react-class";
+import TestCdyField from "./TestCdyField/mobile";
 import SelectProField from "./SelectProField/mobile";
 import SelectProtwoField from "./SelectProtwoField/mobile";
 import SelectTbproField from "./SelectTbproField/mobile";
@@ -39,7 +40,6 @@ import TestMaterialField from "./TestMaterialField/mobile";
 import TestApplicationField from "./TestApplicationField/mobile";
 import TestSetField from "./TestSetField/mobile";
 import TestPurField from "./TestPurField/mobile";
-import TestCdyField from "./TestCdyField/mobile";
 import TestReturnField from "./TestReturnField/mobile";
 import TestExpeField from "./TestExpeField/mobile";
 import TestCinField from "./TestCinField/mobile";
@@ -76,7 +76,10 @@ const Suite = createReactClass({
       <div className="isvzhukuaiwarehousing">
         <div className="mobile-runtime-wrap">
           {this.props.form.getFields().map(field => {
-            if (field.props.commonBizType === 'SelectProField' || field.props.commonBizType === 'SelectPro') {
+            if (field.props.commonBizType === 'TestCdyField' || field.props.commonBizType === 'TestCdy') {
+              return <TestCdyField {...this.props}  bizAlias={field.props.bizAlias} />;
+            }
+if (field.props.commonBizType === 'SelectProField' || field.props.commonBizType === 'SelectPro') {
               return <SelectProField {...this.props}  bizAlias={field.props.bizAlias} />;
             }
 if (field.props.commonBizType === 'SelectProtwoField' || field.props.commonBizType === 'SelectProtwo') {
@@ -189,9 +192,6 @@ if (field.props.commonBizType === 'TestSetField' || field.props.commonBizType ==
             }
 if (field.props.commonBizType === 'TestPurField' || field.props.commonBizType === 'TestPur') {
               return <TestPurField {...this.props}  bizAlias={field.props.bizAlias} />;
-            }
-if (field.props.commonBizType === 'TestCdyField' || field.props.commonBizType === 'TestCdy') {
-              return <TestCdyField {...this.props}  bizAlias={field.props.bizAlias} />;
             }
 if (field.props.commonBizType === 'TestReturnField' || field.props.commonBizType === 'TestReturn') {
               return <TestReturnField {...this.props}  bizAlias={field.props.bizAlias} />;

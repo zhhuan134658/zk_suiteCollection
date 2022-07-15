@@ -8,6 +8,15 @@
   "setters": [],
   "children": [
     {
+      "componentName": "TestCdyField",
+      "bizAlias": "TestCdy",
+      "props": {
+        "placeholder": "请输入",
+        "label": "cdycehsi"
+      },
+      "type": "custom"
+    },
+    {
       "componentName": "MoneyField",
       "bizAlias": "Moneytest",
       "props": {
@@ -1060,15 +1069,6 @@
       "props": {
         "placeholder": "请输入",
         "label": "采购合同"
-      },
-      "type": "custom"
-    },
-    {
-      "componentName": "TestCdyField",
-      "bizAlias": "TestCdy",
-      "props": {
-        "placeholder": "请输入",
-        "label": "cdycehsi"
       },
       "type": "custom"
     },

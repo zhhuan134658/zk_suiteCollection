@@ -954,7 +954,7 @@ const FormField: ISwapFormField = {
                   opacity: 0.15,
                 }}
               >
-                {'Version: 3.1.3'}
+                {'Version: 3.1.4'}
               </div>
               <div style={{ color: '#409EFF', cursor: 'pointer' }}>
                 <Popconfirm
@@ -1033,10 +1033,6 @@ const FormField: ISwapFormField = {
               />
             </div>
 
-            <div className="label" style={{ marginTop: '10px' }}>
-              cdy-ceshi
-            </div>
-            <Input placeholder="cdy-ceshi" />
             {/* <div></div> */}
           </div>
 
