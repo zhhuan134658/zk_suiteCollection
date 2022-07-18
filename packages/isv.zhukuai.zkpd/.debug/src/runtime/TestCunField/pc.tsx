@@ -1,8 +1,6 @@
-import 'dingtalk-jsapi/entry/union';
-import * as dd from 'dingtalk-jsapi'; // 此方式为整体加载，也可按需进行加载
+//重构完成
 import React from 'react';
 import {
-  Tabs,
   notification,
   Table,
   Tooltip,
@@ -16,7 +14,6 @@ import {
 } from 'antd';
 import { CloseCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { ColumnTypes, DataType, ISwapFormField } from '../../types/runtime';
-import { searchBarSubmitRK } from '../../utils/searchUtils';
 import { changePage } from '../../utils/pageUtils';
 import {
   deleteRowForTaxCalcTables,
@@ -28,89 +25,30 @@ const { Content, Sider } = Layout;
 import { EditableRow } from '../../components/editableRow';
 import { EditableCell } from '../../components/editableCell';
 import { ImportDialog } from '../../components/importData';
-import { parsePrintString } from '../../utils/printStringParser';
-import { purColumns } from '../../printColumns/TestPurField';
 import { DetailDialogDesktop } from '../../components/addDetail';
 import { uniqueArrayByKey } from '../../utils/normalizeUtils';
 const { Search } = Input;
-const { TabPane } = Tabs;
-
 const myColumns = [
   {
-    title: (
-      <div>
-        采购主题
-        {/* <Tooltip
-          placement="top"
-          title={
-            <div>
-              <span>灰色字体为已关联过选项</span>
-            </div>
-          }
-        >
-          <QuestionCircleOutlined />
-        </Tooltip> */}
-      </div>
-    ),
+    title: '仓库名称',
     dataIndex: 'name',
-    render: (_, record: any) => {
-      const text = record.xuan === 1 ? '#000000' : '#000000';
-      const style = {
-        color: text,
-      };
-      return (
-        <Tooltip placement="topLeft" title={record.name}>
-          <span style={style}>{record.name}</span>
-        </Tooltip>
-      );
-    },
-  },
-  {
-    title: '采购金额',
-    dataIndex: 'detailed_money',
-  },
-  {
-    title: '操作',
-    dataIndex: 'operation',
-
     render: (_, record: any) => (
-      <a
-        onClick={() =>
-          dd.ready(() => {
-            dd.biz.util.openSlidePanel({
-              url: record.url, //打开侧边栏的url
-              title: '详情', //侧边栏顶部标题
-              onSuccess: function (result) {},
-              onFail: function () {},
-            });
-          })
-        }
-      >
-        查看详情
-      </a>
+      <Tooltip placement="topLeft" title={record.name}>
+        <span>{record.name}</span>
+      </Tooltip>
     ),
   },
-];
-
-const columnsNew = [
   {
-    title: '计划主题',
-    dataIndex: 'name',
-    render: (_, record: any) => {
-      const text = record.xuan === 1 ? '#000000' : '#000000';
-      const style = {
-        color: text,
-      };
-      return (
-        <Tooltip placement="topLeft" title={record.name}>
-          <span style={style}>{record.name}</span>
-        </Tooltip>
-      );
-    },
+    title: '编号',
+    dataIndex: 'number',
   },
   {
-    title: '项目名称',
-    dataIndex: 'project_name',
+    title: '地址',
+    dataIndex: 'address',
+  },
+  {
+    title: '备注',
+    dataIndex: 'remarks',
   },
 ];
 
@@ -142,7 +80,7 @@ const treeDiagramColumns = [
 const FormField: ISwapFormField = {
   getInitialState() {
     return {
-      infourl: '',
+      searchvalue: '',
       detailPage: 1,
       defaultActiveKey: 'a',
       value: undefined,
@@ -151,16 +89,20 @@ const FormField: ISwapFormField = {
       visibleModal: false,
       detdate: 'a1',
       dstatus: '1',
-      detailname: '',
       Inputmoney2: '',
       Inputmoney1: '',
-      current_page: '',
+      detailnamein: '',
+      detailname: '',
+      crophouse: '',
+      ck_name: '',
+      current_page: '', //当前页
       total2: '',
       allData: {
         rk_id: ['a'],
         number: '10',
         page: '1',
         name: '',
+        ck_name: '',
       },
       isModalVisible: false,
       isModalVisibletree: false,
@@ -178,7 +120,7 @@ const FormField: ISwapFormField = {
       //   dataSource: [],
       dataSource: [],
       count: 1,
-      fixedColumn: '',
+      fixedColumn: '', // fixed unit_price or no_unit_price during calculation
       currentEditId: 0,
       currentSelectData: [],
       currentSelectDataid: [],
@@ -198,31 +140,59 @@ const FormField: ISwapFormField = {
           visibleModal: false,
         });
       },
-      handleSetTableData(data: Array<any>) {
-        const sourceData = [..._this.state.dataSource];
+      handleSetTableData(data: any) {
+        console.log('DATA', data);
+        const sourceData = _this.state.dataSource;
         let newData = [];
         if (sourceData && sourceData.length > 0) {
           newData = sourceData.concat(data);
         } else {
           newData = data;
         }
-        console.log('dataLength', newData.length);
         _this.setState(
           {
-            dataSource: [...newData],
+            dataSource: newData,
           },
           () => {
             handleTaxTableStatistics(_this);
           },
         );
       },
+
       handleSearch(value: any, rk_id: string) {
-        searchBarSubmitRK(_this, value, rk_id);
+        if (rk_id === '-1') {
+          const newPage = {
+            rk_id: ['-1'],
+            number: '10',
+            page: 1,
+            name: value,
+            ck_name: _this.state.detailname,
+          };
+          _this.setState({
+            allData: newPage,
+          });
+          _this.asyncSetFieldProps(newPage);
+        } else if (rk_id === 'a') {
+          const newPage = {
+            rk_id: ['-1'],
+            number: '10',
+            page: 1,
+            name: value,
+            isHouse: '1',
+            ck_name: _this.state.detailname,
+          };
+          _this.setState({
+            allData: newPage,
+          });
+          _this.asyncSetFieldProps(newPage);
+        }
       },
       handleChangePage(page: any) {
+        console.log('Page', page);
         changePage(_this, page);
       },
       handleTreeChangePage(page: any) {
+        console.log('TreePage', page);
         _this.setState({ detailPage: page });
         changePage(_this, page, '-1');
       },
@@ -238,20 +208,24 @@ const FormField: ISwapFormField = {
           Inputmoney1: 0,
         });
       },
-      iconClick() {
-        _this.setState({
-          infourl: '',
-          detailname: '',
-          dataSource: [],
-          Inputmoney2: 0,
-          Inputmoney1: 0,
-        });
+      iconClick(typename) {
+        if (typename === 'out') {
+          _this.setState({
+            // detailnamein: '',
+            detailname: '',
+            dataSource: [],
+          });
+        } else {
+          _this.setState({
+            detailnamein: '',
+          });
+        }
       },
 
       handleRowDelete(row: DataType) {
         deleteRowForTaxCalcTables(_this, row);
       },
-      handleProjectAdd() {
+      handleProjectAdd(crophouse) {
         const newData = _this.state.defaultActiveKey;
         _this.setState({
           dstatus: '1',
@@ -261,6 +235,8 @@ const FormField: ISwapFormField = {
           number: '10',
           page: 1,
           name: '',
+          isHouse: '1',
+          ck_name: '',
         };
         _this.setState({
           allData: newPage,
@@ -268,6 +244,7 @@ const FormField: ISwapFormField = {
         _this.asyncSetFieldProps(newPage);
         _this.setState({
           isModalVisible: true,
+          crophouse,
         });
       },
       handleDetailAdd() {
@@ -282,21 +259,23 @@ const FormField: ISwapFormField = {
           dstatus: '2',
         });
         const newpage = {
+          ck_name: '',
           rk_id: ['-1'],
           number: '10',
           page: _this.state.detailPage,
           name: '',
         };
+        newpage.ck_name = _this.state.detailname;
+        console.log('NewPage', newpage);
         _this.asyncSetFieldProps(newpage);
         _this.setState({
           isModalVisibletree: true,
+          allData: newpage,
         });
       },
       handleSave(row: DataType, values: any) {
         const dataList = _this.state.dataSource;
-
         const key = Object.keys(values)[0];
-        //console.log('Key', key);
         const data = handleSaveTaxTable(_this, dataList, row, key);
         _this.setState(
           {
@@ -315,7 +294,7 @@ const FormField: ISwapFormField = {
         const key = newData[index].key;
         newData[index] = record;
         newData[index].key = key;
-        //console.log('SET DATASOURCE 3');
+        console.log('SET DATASOURCE 3');
         _this.setState({ dataSource: newData, isModalVisible: false });
       },
       handleMaterialOK() {
@@ -328,8 +307,8 @@ const FormField: ISwapFormField = {
           });
         }
         lData = [...uniqueArrayByKey(newData, ['id'])];
-        //console.log('Remove duplicate', lData);
-        //console.log('SET STATE DATASOURCE 2');
+        console.log('Remove duplicate', lData);
+        console.log('SET STATE DATASOURCE 2');
         _this.setState({
           dataSource: lData,
           isModalVisibletree: false,
@@ -343,24 +322,34 @@ const FormField: ISwapFormField = {
   },
   handleOk() {
     this.setState({ dstatus: '3' });
-    //console.log(this.state.detdate);
-    const cDataid = [...this.state.currentSelectDataid];
-    const newData = this.state.allData;
-    newData.rk_id = [this.state.detdate, ...cDataid];
-    //console.log(newData);
-    this.asyncSetFieldProps(newData);
-    this.setState({
-      isModalVisible: false,
-      selectedRowKeys: [],
-    });
+    console.log(this.state.detdate);
+    const allselect = this.state.currentSelectData;
+    const crophouse = this.state.crophouse;
+    if (crophouse === 'out') {
+      const allData = this.state.allData;
+      allData['ck_name'] = allselect[0].name;
+      this.setState({
+        detailname: allselect[0].name,
+        ck_name: allselect[0].name,
+        isModalVisible: false,
+        selectedRowKeys: [],
+        allData,
+      });
+    } else if (crophouse === 'in') {
+      this.setState({
+        detailnamein: allselect[0].name,
+        isModalVisible: false,
+        selectedRowKeys: [],
+      });
+    }
   },
   handleCancel() {
     this.setState({ isModalVisible: false, selectedRowKeys: [] });
   },
   asyncSetFieldProps(data: any) {
     const _this = this;
-    const bizAlias = 'TestPur';
-    const promise = asyncSetProps(_this, data, bizAlias, 'material_contract');
+    const bizAlias = 'TestCun';
+    const promise = asyncSetProps(_this, data, bizAlias);
     promise
       .then(res => {
         console.log('ASYNC', res);
@@ -377,6 +366,12 @@ const FormField: ISwapFormField = {
           total3: res.totalCount,
         });
         const dStatus = _this.state.dstatus;
+        res.dataArray.forEach((e, i) => {
+          if (e['wz_number']) {
+            e['det_quantity'] = e['wz_number'];
+          }
+          res.dataArray[i] = e;
+        });
         if (dStatus === '2') {
           const dataArray = [...res.dataArray];
           _this.setState({
@@ -385,25 +380,17 @@ const FormField: ISwapFormField = {
           handleTaxTableStatistics(_this, dataArray);
         } else if (dStatus === '3') {
           const dataArray = [...res.dataArray];
-          //console.log('SET STATE DATASOURCE 1');
+          console.log('SET STATE DATASOURCE 1');
           _this.setState({
             dataSource: [...dataArray],
           });
           handleTaxTableStatistics(_this, dataArray);
         } else if (dStatus === '1') {
-          if (res.dataArray.length === 0) {
-            _this.setState({
-              listData: [],
-              current_page: 1,
-              total2: 0,
-            });
-          } else {
-            _this.setState({
-              listData: [...res.dataArray],
-              current_page: res.currentPage,
-              total2: res.totalCount,
-            });
-          }
+          _this.setState({
+            listData: [...res.dataArray],
+            current_page: res.currentPage,
+            total2: res.totalCount,
+          });
         }
         if (_this.state.msgdata === '1') {
           notification.open({
@@ -420,44 +407,78 @@ const FormField: ISwapFormField = {
   },
   fieldDidUpdate() {
     if (!this.props.runtimeProps.viewMode) {
-      const { form } = this.props;
-      //console.log('发起页：fieldDidUpdate');
+      console.log('发起页：fieldDidUpdate');
       const editData = {
         hanmoney: 0,
         nomoney: 0,
-        detailname: '',
-        infourl: '',
+        warehouse: '',
+        warehousein: '',
         detailedData: [], //物资明细
       };
       if (this.state.Inputmoney1) {
         editData.hanmoney = Number(this.state.Inputmoney1);
-        console.log('Inputmoney2', this.state.Inputmoney1);
-        form.setFieldValue('CaiConMoney', Number(this.state.Inputmoney1));
-        form.setFieldExtendValue('CaiConMoney', Number(this.state.Inputmoney1));
-      }
-      if (this.state.infourl) {
-        editData.infourl = this.state.infourl;
       }
       if (this.state.Inputmoney2) {
         editData.nomoney = Number(this.state.Inputmoney2);
       }
-      editData.detailname = this.state.detailname;
+      editData.warehouse = this.state.detailname;
+      editData.warehousein = this.state.detailnamein;
       editData.detailedData = this.state.dataSource;
+      // 打印数据
       const newlistdata = this.state.dataSource;
-      const str2 = this.state.detailname;
-      const str1 = `不含税金额合计(元)：${this.state.Inputmoney2}\n 含税金额合计(元)：${this.state.Inputmoney1}`;
-      const str = str2 + parsePrintString(newlistdata, purColumns, str1);
+      const str2 =
+        '调出仓库：' +
+        this.state.detailname +
+        '\n' +
+        '调入仓库' +
+        this.state.detailnamein;
+      let str0 =
+        '\n' +
+        '设备名称 单位 规格型号 调拨数量 库存数量 不含税单价 含税单价 税率 税额 不含税金额 含税金额';
+      const str1 =
+        '\n' +
+        ' 不含税金额合计(元):' +
+        this.state.Inputmoney2 +
+        '\n' +
+        '含税金额合计(元):' +
+        this.state.Inputmoney1;
+      for (let i = 0; i < newlistdata.length; i++) {
+        str0 +=
+          '\n' +
+          newlistdata[i].name +
+          ' ' +
+          newlistdata[i].unit +
+          ' ' +
+          newlistdata[i].size +
+          ' ' +
+          newlistdata[i].wz_number +
+          ' ' +
+          newlistdata[i].ku_cun +
+          ' ' +
+          newlistdata[i].no_unit_price +
+          ' ' +
+          newlistdata[i].unit_price +
+          ' ' +
+          newlistdata[i].tax_rate +
+          ' ' +
+          newlistdata[i].tax_amount +
+          ' ' +
+          newlistdata[i].no_amount_tax +
+          ' ' +
+          newlistdata[i].amount_tax;
+      }
+      const str = str2 + str0 + str1;
       console.log(str);
-
-      form.setFieldValue('TestPur', str);
-      form.setFieldExtendValue('TestPur', editData);
+      const { form } = this.props;
+      form.setFieldValue('TestCun', str);
+      form.setFieldExtendValue('TestCun', editData);
     }
   },
   fieldRender() {
     const { form } = this.props;
-    const field = form.getFieldInstance('TestPur');
-    const label = form.getFieldProp('TestPur', 'label');
-    const required = form.getFieldProp('TestPur', 'required');
+    const field = form.getFieldInstance('TestCun');
+    const label = form.getFieldProp('TestCun', 'label');
+    const required = form.getFieldProp('TestCun', 'required');
     const { dataSource, selectedRowKeys } = this.state;
     const deColumns = [
       {
@@ -466,15 +487,6 @@ const FormField: ISwapFormField = {
         render: (_, record: any) => (
           <Tooltip placement="topLeft" title={record.name}>
             <span>{record.name}</span>
-          </Tooltip>
-        ),
-      },
-      {
-        title: '单位',
-        dataIndex: 'unit',
-        render: (_, record: any) => (
-          <Tooltip placement="topLeft" title={record.unit}>
-            <span>{record.unit}</span>
           </Tooltip>
         ),
       },
@@ -488,11 +500,30 @@ const FormField: ISwapFormField = {
         ),
       },
       {
-        title: '数量',
-        dataIndex: 'det_quantity',
+        title: '单位',
+        dataIndex: 'unit',
         render: (_, record: any) => (
-          <Tooltip placement="topLeft" title={record.det_quantity}>
-            <span>{record.det_quantity}</span>
+          <Tooltip placement="topLeft" title={record.unit}>
+            <span>{record.unit}</span>
+          </Tooltip>
+        ),
+      },
+
+      {
+        title: '调拨数量',
+        dataIndex: 'wz_number',
+        render: (_, record: any) => (
+          <Tooltip placement="topLeft" title={record.wz_number}>
+            <span>{record.wz_number}</span>
+          </Tooltip>
+        ),
+      },
+      {
+        title: '库存数量',
+        dataIndex: 'ku_cun',
+        render: (_, record: any) => (
+          <Tooltip placement="topLeft" title={record.ku_cun}>
+            <span>{record.ku_cun}</span>
           </Tooltip>
         ),
       },
@@ -551,25 +582,6 @@ const FormField: ISwapFormField = {
           </Tooltip>
         ),
       },
-      {
-        title: '已入库量',
-        dataIndex: 'quantity_rk',
-        render: (_, record: any) => (
-          <Tooltip placement="topLeft" title={record.quantity_rk}>
-            <span>{record.quantity_rk}</span>
-          </Tooltip>
-        ),
-      },
-      {
-        title: '总计划量',
-        dataIndex: 'quantity_zong',
-
-        render: (_, record: any) => (
-          <Tooltip placement="topLeft" title={record.quantity_zong}>
-            <span>{record.quantity_zong}</span>
-          </Tooltip>
-        ),
-      },
     ];
     const etColumns = [
       {
@@ -599,13 +611,23 @@ const FormField: ISwapFormField = {
           </Tooltip>
         ),
       },
+
       {
-        title: '数量',
-        dataIndex: 'det_quantity',
+        title: '调拨数量',
+        dataIndex: 'wz_number',
         editable: true,
         render: (_, record: any) => (
-          <Tooltip placement="topLeft" title={record.det_quantity}>
-            <span>{record.det_quantity}</span>
+          <Tooltip placement="topLeft" title={record.wz_number}>
+            <span>{record.wz_number}</span>
+          </Tooltip>
+        ),
+      },
+      {
+        title: '库存数量',
+        dataIndex: 'ku_cun',
+        render: (_, record: any) => (
+          <Tooltip placement="topLeft" title={record.ku_cun}>
+            <span>{record.ku_cun}</span>
           </Tooltip>
         ),
       },
@@ -668,7 +690,6 @@ const FormField: ISwapFormField = {
         title: '税率(%)',
         dataIndex: 'tax_rate',
         editable: true,
-        isNumber: true,
         render: (_, record: any) => (
           <Tooltip placement="topLeft" title={record.tax_rate}>
             <span>{record.tax_rate}</span>
@@ -703,25 +724,7 @@ const FormField: ISwapFormField = {
           </Tooltip>
         ),
       },
-      {
-        title: '已入库量',
-        dataIndex: 'quantity_rk',
-        render: (_, record: any) => (
-          <Tooltip placement="topLeft" title={record.quantity_rk}>
-            <span>{record.quantity_rk}</span>
-          </Tooltip>
-        ),
-      },
-      {
-        title: '总计划量',
-        dataIndex: 'quantity_zong',
 
-        render: (_, record: any) => (
-          <Tooltip placement="topLeft" title={record.quantity_zong}>
-            <span>{record.quantity_zong}</span>
-          </Tooltip>
-        ),
-      },
       {
         title: '操作',
         dataIndex: 'operation',
@@ -729,9 +732,9 @@ const FormField: ISwapFormField = {
         render: (_, record: any) =>
           this.state.dataSource.length >= 1 ? (
             <Popconfirm
-              title="确定删除?"
               cancelText="取消"
               okText="确定"
+              title="确定删除?"
               onConfirm={() => this.methods().handleRowDelete(record)}
             >
               <a>删除</a>
@@ -755,7 +758,6 @@ const FormField: ISwapFormField = {
           record,
           editable: col.editable,
           dataIndex: col.dataIndex,
-          isNumber: col.isNumber,
           title: col.title,
           handleSave: this.methods().handleSave,
           handleChange: this.methods().handleRowChange,
@@ -778,26 +780,16 @@ const FormField: ISwapFormField = {
     };
 
     const onExpand = () => {
-      //console.log('Trigger Expand');
-    };
-    const Tabschange = key => {
-      //console.log(key);
-      const newpage = {
-        rk_id: [key],
-        number: '10',
-        page: 1,
-        name: '',
-      };
-      this.setState({
-        defaultActiveKey: key,
-        allData: newpage,
-        detdate: key + '1',
-      });
-      this.asyncSetFieldProps(newpage);
+      console.log('Trigger Expand');
     };
     const rowSelectionMaterial = {
       selectedRowKeys,
       onChange: (selectedRowKeys, selectedRows) => {
+        // console.log(
+        //   `selectedRowKeys: ${selectedRowKeys}`,
+        //   'selectedRows: ',
+        //   selectedRows,
+        // );
         let newData = [...selectedRows];
         let newDataid = [];
         if (newData.length > 0) {
@@ -820,8 +812,7 @@ const FormField: ISwapFormField = {
     const rowSelection = {
       selectedRowKeys,
       onChange: (selectedRowKeys, selectedRows) => {
-        let dtar = '';
-        let url = '';
+        console.log('CHANGE', selectedRowKeys, selectedRows);
         let newData = [...selectedRows];
         let newDataid = [];
         if (newData.length > 0) {
@@ -834,17 +825,10 @@ const FormField: ISwapFormField = {
             return item.id;
           });
         }
-        if (this.state.detdate === 'a1') {
-          dtar = '采购申请-' + (newData[0] ? newData[0]['name'] : '');
-        } else if (this.state.detdate === 'b1') {
-          dtar = '材料总计划-' + (newData[0] ? newData[0]['name'] : '');
-        }
-        url = newData[0] ? newData[0]['url'] : '';
+
         this.setState({
           currentSelectData: newData,
           currentSelectDataid: newDataid,
-          detailname: dtar,
-          infourl: url,
         });
         this.setState({ selectedRowKeys });
       },
@@ -853,17 +837,20 @@ const FormField: ISwapFormField = {
       this.setState({
         msgdata: '1',
       });
+      console.log('Success:', values);
+      //   const [form] = Form.useForm();
       const newdate = this.state.allData;
       newdate.wz_add = values;
       this.asyncSetFieldProps(newdate);
       this.setState({
         visibleModal: false,
       });
+
+      //   form.resetFields();
     };
     const onFinishFailed = (errorInfo: any) => {
       console.log('Failed:', errorInfo);
     };
-
     //详情
     if (this.props.runtimeProps.viewMode) {
       let value = field.getExtendValue();
@@ -871,42 +858,21 @@ const FormField: ISwapFormField = {
       //   value = field.getValue();
       // }
       const {
-        detailname = '',
-        nomoney = 0,
-        infourl = '',
-        hanmoney = 0,
+        warehouse = '',
+        warehousein = '',
         detailedData = [],
       } = value ? value : {};
       return (
         <div className="field-wrapper">
           <div className="label" style={{ marginTop: '10px' }}>
-            {label}
+            调出仓库
           </div>
-          <div
-            style={{ color: '#409eff' }}
-            onClick={() =>
-              dd.ready(() => {
-                dd.biz.util.openSlidePanel({
-                  url: infourl, //打开侧边栏的url
-                  title: '详情', //侧边栏顶部标题
-                  onSuccess: function (result) {},
-                  onFail: function () {},
-                });
-              })
-            }
-          >
-            {detailname}dsaadsasdsad
-          </div>
-
+          <div>{warehouse}</div>
           <div className="label" style={{ marginTop: '10px' }}>
-            {label}
+            调入仓库
           </div>
+          <div>{warehousein}</div>
 
-          {/* <div>
-                      {detailedData.map(item => {
-                        return <div>{item.toString()}</div>;
-                      })}
-                    </div> */}
           <div>
             <Table
               scroll={{ x: '1500px' }}
@@ -919,19 +885,11 @@ const FormField: ISwapFormField = {
               pagination={false}
             />
           </div>
-          <div className="label" style={{ marginTop: '10px' }}>
-            不含税金额合计(元)
-          </div>
-          <div>{nomoney ? Number(nomoney).toFixed(2) : ''}</div>
-          <div className="label" style={{ marginTop: '10px' }}>
-            含税金额合计(元)
-          </div>
-          <div>{hanmoney ? Number(hanmoney).toFixed(2) : ''}</div>
         </div>
       );
     }
     return (
-      <div className="TestPurField_class">
+      <div className="TestCunField_class">
         <div className="pc-custom-field-wrap">
           <div>
             <div
@@ -944,17 +902,7 @@ const FormField: ISwapFormField = {
                 ) : (
                   <span style={{ color: '#fff' }}>*</span>
                 )}
-                {label}
-              </div>
-              <div
-                style={{
-                  position: 'fixed',
-                  bottom: 0,
-                  right: 0,
-                  opacity: 0.15,
-                }}
-              >
-                {'Version: 3.1.4'}
+                调出仓库
               </div>
               <div style={{ color: '#409EFF', cursor: 'pointer' }}>
                 <Popconfirm
@@ -968,13 +916,35 @@ const FormField: ISwapFormField = {
               </div>
             </div>
             <Input
-              onClick={this.methods().handleProjectAdd}
+              onClick={this.methods().handleProjectAdd.bind(this, 'out')}
               readOnly
               value={this.state.detailname}
               placeholder="请选择"
               suffix={
                 <CloseCircleOutlined
-                  onClick={this.methods().iconClick}
+                  onClick={this.methods().iconClick.bind(this, 'out')}
+                  style={{ color: 'rgba(0,0,0,.45)' }}
+                />
+              }
+            />
+          </div>
+          <div style={{ marginTop: '10px' }}>
+            <div className="label" style={{ marginTop: '10px' }}>
+              {required ? (
+                <span style={{ color: '#ea6d5c' }}>*</span>
+              ) : (
+                <span style={{ color: '#fff' }}>*</span>
+              )}
+              调入仓库
+            </div>
+            <Input
+              onClick={this.methods().handleProjectAdd.bind(this, 'in')}
+              readOnly
+              value={this.state.detailnamein}
+              placeholder="请选择"
+              suffix={
+                <CloseCircleOutlined
+                  onClick={this.methods().iconClick.bind(this, 'in')}
                   style={{ color: 'rgba(0,0,0,.45)' }}
                 />
               }
@@ -1009,7 +979,7 @@ const FormField: ISwapFormField = {
                 columns={columns}
                 binding={this}
                 setTableData={this.methods().handleSetTableData}
-                bizAlias="TestPur"
+                bizAlias="TestCun"
               />
             </div>
             <div className="label" style={{ marginTop: '10px' }}>
@@ -1032,12 +1002,9 @@ const FormField: ISwapFormField = {
                 placeholder="自动计算"
               />
             </div>
-
-            {/* <div></div> */}
           </div>
-
           <Modal className="isvzhukuaiwarehousing" 
-            title="关联"
+            title="选择仓库"
             width={1000}
             visible={this.state.isModalVisible}
             footer={[
@@ -1055,85 +1022,40 @@ const FormField: ISwapFormField = {
             ]}
             onCancel={this.handleCancel}
           >
-            <Tabs
-              className="Tabs_class"
-              defaultActiveKey="a"
-              centered
-              onChange={Tabschange}
-            >
-              <TabPane tab="采购申请" key="a">
-                <Search
-                  placeholder="请输入"
-                  allowClear
-                  enterButton="搜索"
-                  size="large"
-                  onSearch={val => {
-                    this.methods().handleSearch(val, 'a');
-                  }}
-                  onChange={e => {
-                    if (e.target.value === '') {
-                      this.methods().handleSearch('', 'a');
-                    }
-                  }}
-                />
-                <Table
-                  scroll={{ x: '1500px' }}
-                  rowSelection={{
-                    type: 'radio',
-                    ...rowSelection,
-                  }}
-                  className="full-size-editable"
-                  rowKey={record => record.id}
-                  columns={myColumns}
-                  dataSource={this.state.listData}
-                  loading={this.state.loading}
-                  pagination={false}
-                ></Table>
-                <Pagination
-                  defaultCurrent={1}
-                  total={this.state.total2}
-                  hideOnSinglePage={true}
-                  className="pagination"
-                  onChange={this.methods().handleChangePage}
-                />
-              </TabPane>
-              <TabPane tab="材料总计划" key="b">
-                <Search
-                  placeholder="请输入"
-                  allowClear
-                  enterButton="搜索"
-                  size="large"
-                  onSearch={val => {
-                    this.methods().handleSearch(val, 'b');
-                  }}
-                  onChange={e => {
-                    if (e.target.value === '') {
-                      this.methods().handleSearch('', 'b');
-                    }
-                  }}
-                />
-                <Table
-                  scroll={{ x: '1500px' }}
-                  rowSelection={{
-                    type: 'radio',
-                    ...rowSelection,
-                  }}
-                  className="full-size-editable"
-                  rowKey={record => record.id}
-                  columns={columnsNew}
-                  dataSource={this.state.listData}
-                  loading={this.state.loading}
-                  pagination={false}
-                ></Table>
-                <Pagination
-                  defaultCurrent={1}
-                  total={this.state.total2}
-                  hideOnSinglePage={true}
-                  className="pagination"
-                  onChange={this.methods().handleChangePage}
-                />
-              </TabPane>
-            </Tabs>
+            <Search
+              placeholder="请输入"
+              allowClear
+              enterButton="搜索"
+              size="large"
+              onSearch={val => {
+                this.methods().handleSearch(val, 'a');
+              }}
+              onChange={e => {
+                if (e.target.value === '') {
+                  this.methods().handleSearch('', 'a');
+                }
+              }}
+            />
+            <Table
+              scroll={{ x: '1500px' }}
+              rowSelection={{
+                type: 'radio',
+                ...rowSelection,
+              }}
+              className="full-size-editable"
+              rowKey={record => record.id}
+              columns={myColumns}
+              dataSource={this.state.listData}
+              loading={this.state.loading}
+              pagination={false}
+            ></Table>
+            <Pagination
+              defaultCurrent={1}
+              total={this.state.total2}
+              hideOnSinglePage={true}
+              className="pagination"
+              onChange={this.methods().handleChangePage}
+            />
           </Modal>
           {/* 树形 */}
 
@@ -1215,24 +1137,6 @@ const FormField: ISwapFormField = {
         </div>
       </div>
     );
-  },
-  onExtraClick: function (): void {
-    throw new Error('Function not implemented.');
-  },
-  onOpenChange: function (): void {
-    throw new Error('Function not implemented.');
-  },
-  onCancel: function (): void {
-    throw new Error('Function not implemented.');
-  },
-  onSearchBarChange: function (value: any): void {
-    throw new Error('Function not implemented.');
-  },
-  onSubmit: function (value: any): void {
-    throw new Error('Function not implemented.');
-  },
-  habdlClick: function (item: any): void {
-    throw new Error('Function not implemented.');
   },
 };
 

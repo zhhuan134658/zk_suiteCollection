@@ -1,0 +1,35 @@
+
+  {
+    "plugins": [
+      "build-plugin-component",
+      [
+        "build-plugin-stark-module",
+        {
+          "moduleExternals": {
+            "react": {
+              "root": "React",
+              "url": "https://g.alicdn.com/code/lib/react/16.13.1/umd/react.production.min.js"
+            },
+            "react-dom": {
+              "root": "ReactDOM",
+              "url": "https://g.alicdn.com/code/lib/react-dom/16.13.1/umd/react-dom.production.min.js"
+            },
+            "antd": {
+              "root": "antd",
+              "url": "https://cdn.bootcdn.net/ajax/libs/antd/4.16.9/antd.min.js"
+            },
+            "antd-mobile": {
+              "root": "AntdMobile",
+              "url": "https://cdn.bootcdn.net/ajax/libs/antd/4.16.9/antd.min.js"
+            }
+          },
+          "modules": {
+            "pc": ".debug/runtime/pc.tsx",
+            "mobile": ".debug/runtime/mobile.tsx",
+            
+            "config": ".debug/config.ts"
+          }
+        }
+      ]
+    ]
+  }
