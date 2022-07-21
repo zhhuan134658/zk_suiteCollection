@@ -542,7 +542,7 @@ const ImportDialog: React.FC<{
             padding-bottom: 8px;
         }
       `}</style>
-      <Modal className="isvzhukuaiwarehousing" 
+      <Modal className="isvzhukuaizkpd" 
         visible={modalVisible}
         onCancel={handleCancel}
         width={750}

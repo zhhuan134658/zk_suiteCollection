@@ -129,7 +129,7 @@ const HandledDetailDialogMobile: React.FC<{
 
         document.getElementById('MF_APP'),
       )}
-      <Modal className="isvzhukuaiwarehousing" 
+      <Modal className="isvzhukuaizkpd" 
         visible={visible}
         bodyStyle={{
           borderTopLeftRadius: '8px',
@@ -426,7 +426,7 @@ const SupplierMobileDialog: React.FC<{
       >
         新增供应商
       </Button>
-      <Modal className="isvzhukuaiwarehousing" 
+      <Modal className="isvzhukuaizkpd" 
         visible={visible}
         bodyStyle={{
           borderTopLeftRadius: '8px',
@@ -585,7 +585,7 @@ const StorageMobileDialog: React.FC<{
       >
         新增仓库
       </Button>
-      <Modal className="isvzhukuaiwarehousing" 
+      <Modal className="isvzhukuaizkpd" 
         visible={visible}
         bodyStyle={{
           borderTopLeftRadius: '8px',

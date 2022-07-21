@@ -777,9 +777,6 @@ const FormField: ISwapFormField = {
       this.asyncSetFieldProps(treedata);
     };
 
-    const onExpand = () => {
-      //console.log('Trigger Expand');
-    };
     const Tabschange = key => {
       //console.log(key);
       const newpage = {
@@ -1162,7 +1159,7 @@ const FormField: ISwapFormField = {
                   defaultExpandedKeys={['0']}
                   blockNode
                   onSelect={onSelect}
-                  onExpand={onExpand}
+                  //   onExpand={onExpand}
                   treeData={this.state.treeData}
                 />
               </Sider>

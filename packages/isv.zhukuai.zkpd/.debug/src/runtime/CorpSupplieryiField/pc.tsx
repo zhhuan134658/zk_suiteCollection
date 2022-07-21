@@ -326,7 +326,7 @@ const FormField: ISwapFormField = {
             />
           </div>
 
-          <Modal className="isvzhukuaiwarehousing" 
+          <Modal className="isvzhukuaizkpd" 
             title="选择供应商"
             width={1000}
             visible={this.state.isModalVisible}
@@ -397,7 +397,7 @@ const FormField: ISwapFormField = {
             </Layout>
           </Modal>
           {/* 新增个 */}
-          <Modal className="isvzhukuaiwarehousing" 
+          <Modal className="isvzhukuaizkpd" 
             onCancel={this.methods().hideModal}
             visible={this.state.visibleModal}
             width={1000}

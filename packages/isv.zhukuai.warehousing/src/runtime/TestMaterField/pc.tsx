@@ -17,7 +17,49 @@ import { searchBarSubmitRK } from '../../utils/searchUtils';
 import { fpAdd } from '../../utils/fpOperations';
 const { TabPane } = Tabs;
 const { Search } = Input;
+
+//采购合同
 const myColumns = [
+  {
+    title: (
+      <div>
+        合同名称
+        {/* <Tooltip
+          placement="top"
+          title={
+            <div>
+              <span>灰色字体为已关联过选项</span>
+            </div>
+          }
+        >
+          <QuestionCircleOutlined />
+        </Tooltip> */}
+      </div>
+    ),
+    dataIndex: 'name',
+    render: (_, record: any) => {
+      const text = record.xuan === 1 ? '#000000' : '#000000';
+      const style = {
+        color: text,
+      };
+      return (
+        <Tooltip placement="topLeft" title={record.name}>
+          <span style={style}>{record.name}</span>
+        </Tooltip>
+      );
+    },
+  },
+  {
+    title: '供应商',
+    dataIndex: 'supplier',
+  },
+  {
+    title: '合同金额',
+    dataIndex: 'settle_money',
+  },
+];
+
+const myColumns1 = [
   {
     title: (
       <div>
@@ -53,6 +95,88 @@ const myColumns = [
   },
   {
     title: '结算金额',
+    dataIndex: 'settle_money',
+  },
+];
+
+//材料入库
+const myColumns2 = [
+  {
+    title: (
+      <div>
+        入库名称
+        {/* <Tooltip
+          placement="top"
+          title={
+            <div>
+              <span>灰色字体为已关联过选项</span>
+            </div>
+          }
+        >
+          <QuestionCircleOutlined />
+        </Tooltip> */}
+      </div>
+    ),
+    dataIndex: 'name',
+    render: (_, record: any) => {
+      const text = record.xuan === 1 ? '#000000' : '#000000';
+      const style = {
+        color: text,
+      };
+      return (
+        <Tooltip placement="topLeft" title={record.name}>
+          <span style={style}>{record.name}</span>
+        </Tooltip>
+      );
+    },
+  },
+  {
+    title: '供应商',
+    dataIndex: 'supplier',
+  },
+  {
+    title: '入库金额',
+    dataIndex: 'settle_money',
+  },
+];
+
+//采购订单
+const myColumns3 = [
+  {
+    title: (
+      <div>
+        采购名称
+        {/* <Tooltip
+          placement="top"
+          title={
+            <div>
+              <span>灰色字体为已关联过选项</span>
+            </div>
+          }
+        >
+          <QuestionCircleOutlined />
+        </Tooltip> */}
+      </div>
+    ),
+    dataIndex: 'name',
+    render: (_, record: any) => {
+      const text = record.xuan === 1 ? '#000000' : '#000000';
+      const style = {
+        color: text,
+      };
+      return (
+        <Tooltip placement="topLeft" title={record.name}>
+          <span style={style}>{record.name}</span>
+        </Tooltip>
+      );
+    },
+  },
+  {
+    title: '供应商',
+    dataIndex: 'supplier',
+  },
+  {
+    title: '订单金额',
     dataIndex: 'settle_money',
   },
 ];
@@ -390,6 +514,24 @@ const FormField: ISwapFormField = {
       );
     }
 
+    let MyColumns = myColumns;
+
+    switch (this.state.defaultActiveKey) {
+      case 'b':
+        MyColumns = myColumns;
+        break;
+
+      case 'c':
+        MyColumns = myColumns3;
+        break;
+
+      case 'd':
+        MyColumns = myColumns2;
+        break;
+      default:
+        break;
+    }
+
     return (
       <div className="TestMaterField_class">
         <div className="pc-custom-field-wrap">
@@ -467,7 +609,7 @@ const FormField: ISwapFormField = {
                 ...rowSelection,
               }}
               rowKey={record => record.id}
-              columns={myColumns}
+              columns={MyColumns}
               dataSource={this.state.listData}
               loading={this.state.loading}
               pagination={false}

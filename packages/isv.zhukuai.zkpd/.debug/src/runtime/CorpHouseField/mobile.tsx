@@ -185,7 +185,7 @@ const FormField: ISwapFormField = {
               ></InputItem> */}
             {/* 使用这种方式，将组件挂在到根元素下，防止样式污染 */}
             {createPortal(
-              <Drawer className="isvzhukuaiwarehousing" 
+              <Drawer className="isvzhukuaizkpd" 
                 open={true}
                 style={{
                   minHeight: document.documentElement.clientHeight,

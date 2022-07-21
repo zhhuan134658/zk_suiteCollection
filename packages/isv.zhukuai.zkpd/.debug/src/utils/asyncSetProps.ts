@@ -11,7 +11,7 @@ const asyncSetProps = async (
   const { form, spi } = _this.props;
   const projectBizAlias = projectBiz ? projectBiz : 'Autopro';
   const ProjectName = form.getFieldValue(projectBizAlias);
-  console.log('123456', projectBizAlias, ProjectName,form);
+  console.log('123456', projectBizAlias, ProjectName, form);
   value.project_name = ProjectName;
   const biz = bizAlias;
   if (altProjectName) {
@@ -30,12 +30,18 @@ const asyncSetProps = async (
       value: '1',
     },
   ];
+  console.log(bizAsyncData, 'bizAsyncData');
   try {
     const promise = await spi.refreshData({
       modifiedBizAlias: [biz],
       bizAsyncData,
     });
     const res: resRefreshData = promise;
+    // console.log(
+    //   res,
+    //   '11111111111111111111',
+    //   JSON.parse(res?.dataList[0]?.value),
+    // );
     const resolveData: refreshDataResolve = {
       dataArray: undefined,
       extendArray: undefined,
@@ -44,11 +50,11 @@ const asyncSetProps = async (
       message: undefined,
     };
     try {
-      resolveData.dataArray = JSON.parse(res.dataList[0].value).data;
-      resolveData.currentPage = JSON.parse(res.dataList[0].value).page;
-      resolveData.extendArray = JSON.parse(res.dataList[0].extendValue);
-      resolveData.totalCount = JSON.parse(res.dataList[0].value).count;
-      resolveData.message = JSON.parse(res.dataList[0].value).msg;
+      resolveData.dataArray = JSON.parse(res?.dataList[0]?.value).data;
+      resolveData.currentPage = JSON.parse(res?.dataList[0]?.value).page;
+      //   resolveData.extendArray = JSON.parse(res?.dataList[0]?.extendValue);
+      resolveData.totalCount = JSON.parse(res?.dataList[0]?.value).count;
+      //   resolveData.message = JSON.parse(res?.dataList[0]?.value).msg;
       return resolveData;
     } catch (e) {
       throw new Error(e);

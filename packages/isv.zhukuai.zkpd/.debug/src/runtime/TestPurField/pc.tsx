@@ -32,26 +32,18 @@ import { parsePrintString } from '../../utils/printStringParser';
 import { purColumns } from '../../printColumns/TestPurField';
 import { DetailDialogDesktop } from '../../components/addDetail';
 import { uniqueArrayByKey } from '../../utils/normalizeUtils';
+
+import { SelectBtn } from '../../components/selectBtn/index';
+import { PlusSquareOutlined, MinusSquareOutlined } from '@ant-design/icons';
+
+import './pc.less';
+
 const { Search } = Input;
 const { TabPane } = Tabs;
 
 const myColumns = [
   {
-    title: (
-      <div>
-        采购主题
-        {/* <Tooltip
-          placement="top"
-          title={
-            <div>
-              <span>灰色字体为已关联过选项</span>
-            </div>
-          }
-        >
-          <QuestionCircleOutlined />
-        </Tooltip> */}
-      </div>
-    ),
+    title: '采购主题',
     dataIndex: 'name',
     render: (_, record: any) => {
       const text = record.xuan === 1 ? '#000000' : '#000000';
@@ -68,11 +60,13 @@ const myColumns = [
   {
     title: '采购金额',
     dataIndex: 'detailed_money',
+    width: 100,
   },
   {
     title: '操作',
     dataIndex: 'operation',
-
+    // width: 100,
+    ellipsis: true,
     render: (_, record: any) => (
       <a
         onClick={() =>
@@ -86,9 +80,48 @@ const myColumns = [
           })
         }
       >
-        查看详情
+        查看详情查看详情查看详情查看详情查看详情查看详情查看详情查看详情查看详情查看详情查看详情查看详情查看详情查看详情查看详情查看详情
       </a>
     ),
+  },
+];
+
+const myColumsChildren = [
+  {
+    title: '物资名称',
+    dataIndex: 'name',
+  },
+  {
+    title: '单位',
+    dataIndex: 'unit',
+  },
+  {
+    title: '规格型号',
+    dataIndex: 'size',
+  },
+  {
+    title: '需用数量',
+    dataIndex: 'number',
+  },
+  {
+    title: '累计申请量',
+    dataIndex: 'number1',
+  },
+  {
+    title: '总计划量',
+    dataIndex: 'number2',
+  },
+  {
+    title: '参考价格',
+    dataIndex: 'number3',
+  },
+  {
+    title: '小计(元)',
+    dataIndex: 'number4',
+  },
+  {
+    title: '备注',
+    dataIndex: 'number5',
   },
 ];
 
@@ -111,6 +144,7 @@ const columnsNew = [
   {
     title: '项目名称',
     dataIndex: 'project_name',
+    width: 200,
   },
 ];
 
@@ -153,7 +187,7 @@ const FormField: ISwapFormField = {
       dstatus: '1',
       detailname: '',
       Inputmoney2: '',
-      Inputmoney1: '',
+      Inputmoney1: '', // 含税
       current_page: '',
       total2: '',
       allData: {
@@ -182,7 +216,10 @@ const FormField: ISwapFormField = {
       currentEditId: 0,
       currentSelectData: [],
       currentSelectDataid: [],
-      selectedRowKeys: [],
+      selectedRowKeys: [], // 一级表格选中的keys
+      selectAutoProValue: '', // 所属项目 label值
+      expandedRowKeys: [], // 关联modal下表格展开子表格数据keys
+      childrenRowKeys: [], // 子表格数据选中的keys
     };
   },
   methods() {
@@ -236,6 +273,10 @@ const FormField: ISwapFormField = {
           dataSource: [],
           Inputmoney2: 0,
           Inputmoney1: 0,
+          detailname: '',
+          selectedRowKeys: [],
+          expandedRowKeys: [],
+          childrenRowKeys: [],
         });
       },
       iconClick() {
@@ -248,8 +289,40 @@ const FormField: ISwapFormField = {
         });
       },
 
-      handleRowDelete(row: DataType) {
-        deleteRowForTaxCalcTables(_this, row);
+      handleRowDelete(row: any) {
+        const { childrenRowKeys, dataSources } = _this.state;
+        const { id } = row;
+        const removeChildId = childrenRowKeys.filter(v => v !== id);
+        if (removeChildId.length <= 0) {
+          _this.setState({
+            dataSource: [],
+            Inputmoney2: 0,
+            Inputmoney1: 0,
+            detailname: '',
+            selectedRowKeys: [],
+            expandedRowKeys: [],
+            childrenRowKeys: [],
+          });
+        } else {
+          const newDataSource = dataSources.filter(v => v.id !== id);
+          let newInputmoney1 = 0;
+          let newInputmoney2 = 0;
+          newDataSource.forEach(item => {
+            /**
+             *  amount_tax 含税金额
+             * no_amount_tax  不含税金额
+             */
+            const { amount_tax, no_amount_tax } = item;
+            newInputmoney1 += Number(amount_tax) ? Number(amount_tax) : 0;
+            newInputmoney2 += Number(no_amount_tax) ? Number(no_amount_tax) : 0;
+          });
+          this.setState({
+            childrenRowKeys: removeChildId,
+            dataSources: newDataSource,
+          });
+        }
+
+        // deleteRowForTaxCalcTables(_this, row);
       },
       handleProjectAdd() {
         const newData = _this.state.defaultActiveKey;
@@ -287,6 +360,7 @@ const FormField: ISwapFormField = {
           page: _this.state.detailPage,
           name: '',
         };
+        console.log('添加明细', newpage);
         _this.asyncSetFieldProps(newpage);
         _this.setState({
           isModalVisibletree: true,
@@ -339,80 +413,103 @@ const FormField: ISwapFormField = {
       handleMaterialCancel() {
         _this.setState({ isModalVisibletree: false, selectedRowKeys: [] });
       },
+      setExpandedRowKeys(record) {
+        console.log(record, 'recordasdasdasdasdasdasdasdasdas');
+      },
     };
   },
   handleOk() {
-    this.setState({ dstatus: '3' });
-    //console.log(this.state.detdate);
-    const cDataid = [...this.state.currentSelectDataid];
-    const newData = this.state.allData;
-    newData.rk_id = [this.state.detdate, ...cDataid];
-    //console.log(newData);
-    this.asyncSetFieldProps(newData);
+    // this.setState({ dstatus: '3' });
+    // const cDataid = [...this.state.currentSelectDataid];
+    // const newData = this.state.allData;
+    // newData.rk_id = [this.state.detdate, ...cDataid];
+    // this.asyncSetFieldProps(newData);
+
     this.setState({
       isModalVisible: false,
-      selectedRowKeys: [],
+      //   selectedRowKeys: [],
     });
   },
   handleCancel() {
-    this.setState({ isModalVisible: false, selectedRowKeys: [] });
+    this.setState({ isModalVisible: false });
+    // this.setState({ isModalVisible: false, selectedRowKeys: [] });
   },
   asyncSetFieldProps(data: any) {
     const _this = this;
     const bizAlias = 'TestPur';
     const promise = asyncSetProps(_this, data, bizAlias, 'material_contract');
+    const { dstatus } = this.state;
     promise
       .then(res => {
-        console.log('ASYNC', res);
-        const treeArray = [
-          {
-            title: '物资类型',
-            key: '0',
-            children: res.extendArray,
-          },
-        ];
-        _this.setState({
-          treeData: [...treeArray],
-          current_page: res.currentPage,
-          total3: res.totalCount,
-        });
-        const dStatus = _this.state.dstatus;
-        if (dStatus === '2') {
-          const dataArray = [...res.dataArray];
-          _this.setState({
-            treelistData: dataArray,
-          });
-          handleTaxTableStatistics(_this, dataArray);
-        } else if (dStatus === '3') {
-          const dataArray = [...res.dataArray];
-          //console.log('SET STATE DATASOURCE 1');
-          _this.setState({
-            dataSource: [...dataArray],
-          });
-          handleTaxTableStatistics(_this, dataArray);
-        } else if (dStatus === '1') {
-          if (res.dataArray.length === 0) {
-            _this.setState({
-              listData: [],
-              current_page: 1,
-              total2: 0,
+        // console.log('ASYNC', res);
+        const { dataArray } = res;
+        if (dstatus === '1') {
+          dataArray.forEach(item => {
+            const { id, childrens } = item;
+            const lg = childrens.length || 0;
+            childrens.forEach(childItem => {
+              childItem.pId = id;
+              childItem.length = lg;
             });
-          } else {
-            _this.setState({
-              listData: [...res.dataArray],
-              current_page: res.currentPage,
-              total2: res.totalCount,
-            });
-          }
-        }
-        if (_this.state.msgdata === '1') {
-          notification.open({
-            message: res.message,
           });
-          _this.setState({
-            msgdata: '0',
+
+          console.log(dataArray, 'dataArray');
+          this.setState({
+            listData: dataArray,
+            current_page: res.currentPage || 0,
+            total2: res.totalCount || 0,
           });
         }
+        // const treeArray = [
+        //   {
+        //     title: '物资类型',
+        //     key: '0',
+        //     children: res.extendArray,
+        //   },
+        // ];
+        // _this.setState({
+        //   treeData: [...treeArray],
+        //   current_page: res.currentPage,
+        //   total3: res.totalCount,
+        // });
+        // const dStatus = _this.state.dstatus;
+        // console.log(_this.state.dstatus, res, 'ressssss');
+        // if (dStatus === '2') {
+        //   const dataArray = [...res.dataArray];
+        //   _this.setState({
+        //     treelistData: dataArray,
+        //   });
+        //   handleTaxTableStatistics(_this, dataArray);
+        // } else if (dStatus === '3') {
+        //   const dataArray = [...res.dataArray];
+        //   //console.log('SET STATE DATASOURCE 1');
+        //   _this.setState({
+        //     dataSource: [...dataArray],
+        //   });
+        //   handleTaxTableStatistics(_this, dataArray);
+        // } else if (dStatus === '1') {
+        //   if (res.dataArray.length === 0) {
+        //     _this.setState({
+        //       listData: [],
+        //       current_page: 1,
+        //       total2: 0,
+        //     });
+        //   } else {
+        //     _this.setState({
+        //       listData: [...res.dataArray],
+        //       current_page: res.currentPage,
+        //       total2: res.totalCount,
+        //     });
+        //   }
+        // }
+        // if (_this.state.msgdata === '1') {
+        //   notification.open({
+        //     message: res.message,
+        //   });
+        //   _this.setState({
+        //     msgdata: '0',
+        //   });
+        // }
       })
       .catch(e => {
         console.log('ASYNC ERROR', e);
@@ -458,6 +555,33 @@ const FormField: ISwapFormField = {
     const field = form.getFieldInstance('TestPur');
     const label = form.getFieldProp('TestPur', 'label');
     const required = form.getFieldProp('TestPur', 'required');
+
+    const selectAutoPro = form.getFieldInstance('Autopro');
+    const initValue = selectAutoPro.getValue();
+
+    /* 监听‘所属项目’START */
+    const _this = this;
+    form.onFieldExtendValueChange('Autopro', (value: any) => {
+      console.log(value, 'valuesssssssssssss');
+      const { selectAutoProValue } = this.state;
+      const initFlag =
+        (!selectAutoProValue && value.label !== initValue) ||
+        value.label !== selectAutoProValue;
+      if (initFlag) {
+        _this.setState({
+          selectAutoProValue: label,
+          Inputmoney2: 0,
+          Inputmoney1: 0,
+          detailname: '',
+          dataSource: [],
+          childrenRowKeys: [],
+          selectedRowKeys: [],
+          expandedRowKeys: [],
+        });
+      }
+    });
+    /* 监听‘所属项目’END */
+
     const { dataSource, selectedRowKeys } = this.state;
     const deColumns = [
       {
@@ -820,33 +944,57 @@ const FormField: ISwapFormField = {
     const rowSelection = {
       selectedRowKeys,
       onChange: (selectedRowKeys, selectedRows) => {
-        let dtar = '';
-        let url = '';
-        let newData = [...selectedRows];
-        let newDataid = [];
-        if (newData.length > 0) {
-          newData = newData.map(item => {
-            return Object.assign(item, {
-              num: 1,
-            });
-          });
-          newDataid = newData.map(item => {
-            return item.id;
-          });
-        }
-        if (this.state.detdate === 'a1') {
-          dtar = '采购申请-' + (newData[0] ? newData[0]['name'] : '');
-        } else if (this.state.detdate === 'b1') {
-          dtar = '材料总计划-' + (newData[0] ? newData[0]['name'] : '');
-        }
-        url = newData[0] ? newData[0]['url'] : '';
-        this.setState({
-          currentSelectData: newData,
-          currentSelectDataid: newDataid,
-          detailname: dtar,
-          infourl: url,
+        const { name, childrens } = selectedRows[0];
+        const childId = [];
+        let newInputmoney1 = 0;
+        let newInputmoney2 = 0;
+
+        childrens.forEach(item => {
+          const { id, amount_tax, no_amount_tax } = item;
+          childId.push(id);
+          newInputmoney1 += Number(amount_tax) ? Number(amount_tax) : 0;
+          newInputmoney2 += Number(no_amount_tax) ? Number(no_amount_tax) : 0;
         });
-        this.setState({ selectedRowKeys });
+        this.setState({
+          selectedRowKeys,
+          expandedRowKeys: selectedRowKeys,
+          childrenRowKeys: childId,
+          dataSource: childrens,
+          detailname: name,
+          Inputmoney1: newInputmoney1,
+          Inputmoney2: newInputmoney2,
+        });
+
+        // let dtar = '';
+        // let url = '';
+        // let newData = [...selectedRows];
+        // let newDataid = [];
+        // if (newData.length > 0) {
+        //   newData = newData.map(item => {
+        //     return Object.assign(item, {
+        //       num: 1,
+        //     });
+        //   });
+        //   newDataid = newData.map(item => {
+        //     return item.id;
+        //   });
+        // }
+        // if (this.state.detdate === 'a1') {
+        //   dtar = '采购申请-' + (newData[0] ? newData[0]['name'] : '');
+        // } else if (this.state.detdate === 'b1') {
+        //   dtar = '材料总计划-' + (newData[0] ? newData[0]['name'] : '');
+        // }
+        // url = newData[0] ? newData[0]['url'] : '';
+        // this.setState({
+        //   currentSelectData: newData,
+        //   currentSelectDataid: newDataid,
+        //   detailname: dtar,
+        //   infourl: url,
+
+        //   selectedRowKeys,
+        //   expandedRowKeys: selectedRowKeys,
+        //   childrenRowKeys: [1, 2],
+        // });
       },
     };
     const onFinish = (values: any) => {
@@ -862,6 +1010,61 @@ const FormField: ISwapFormField = {
     };
     const onFinishFailed = (errorInfo: any) => {
       console.log('Failed:', errorInfo);
+    };
+
+    const returnChildrenTable = record => {
+      const { childrens } = record;
+      const { listData, dataSource } = this.state;
+      return (
+        <Table
+          className="childrenTable"
+          columns={myColumsChildren}
+          //   columns={etColumns}
+          dataSource={childrens}
+          rowKey={record => record.id}
+          pagination={false}
+          rowSelection={{
+            type: 'checkbox',
+            columnTitle: ' ', //  隐藏全选勾选框
+            selectedRowKeys: this.state.childrenRowKeys,
+            onChange: (selectedRowKeys, selectedRows) => {
+              if (selectedRowKeys.length > 0) {
+                const { pId } = selectedRows[0];
+                const { name = '' } = listData.filter(v => v.id === pId)?.[0];
+                const newDataSource = [...dataSource, ...selectedRows];
+                let newInputmoney1 = 0;
+                let newInputmoney2 = 0;
+
+                newDataSource.forEach(item => {
+                  const { amount_tax, no_amount_tax } = item;
+                  newInputmoney1 += Number(amount_tax) ? Number(amount_tax) : 0;
+                  newInputmoney2 += Number(no_amount_tax)
+                    ? Number(no_amount_tax)
+                    : 0;
+                });
+                this.setState({
+                  childrenRowKeys: selectedRowKeys,
+                  selectedRowKeys: [pId], // 反选 父级
+                  detailname: name,
+                  dataSource: newDataSource,
+                  Inputmoney1: newInputmoney1,
+                  Inputmoney2: newInputmoney2,
+                });
+              } else {
+                this.setState({
+                  childrenRowKeys: selectedRowKeys,
+                  selectedRowKeys: [],
+                  detailname: '',
+                  dataSource: [],
+                  Inputmoney1: 0,
+                  Inputmoney2: 0,
+                  //   expandedRowKeys: []
+                });
+              }
+            },
+          }}
+        />
+      );
     };
 
     //详情
@@ -967,7 +1170,13 @@ const FormField: ISwapFormField = {
                 </Popconfirm>
               </div>
             </div>
-            <Input
+            <SelectBtn
+              title={this.state.detailname}
+              initSelect={this.methods().handleProjectAdd}
+              resetSelect={this.methods().handleProjectAdd}
+              deleteSelect={this.methods().ResetClick}
+            />
+            {/* <Input
               onClick={this.methods().handleProjectAdd}
               readOnly
               value={this.state.detailname}
@@ -978,7 +1187,7 @@ const FormField: ISwapFormField = {
                   style={{ color: 'rgba(0,0,0,.45)' }}
                 />
               }
-            />
+            /> */}
           </div>
           <div style={{ marginTop: '10px' }}>
             <Table
@@ -1036,14 +1245,14 @@ const FormField: ISwapFormField = {
             {/* <div></div> */}
           </div>
 
-          <Modal className="isvzhukuaiwarehousing" 
+          <Modal className="isvzhukuaizkpd" 
             title="关联"
             width={1000}
             visible={this.state.isModalVisible}
             footer={[
-              <Button key="back" onClick={this.handleCancel}>
-                返回
-              </Button>,
+              //   <Button key="back" onClick={this.handleCancel}>
+              //     返回
+              //   </Button>,
               <Button
                 key="submit"
                 type="primary"
@@ -1077,7 +1286,7 @@ const FormField: ISwapFormField = {
                   }}
                 />
                 <Table
-                  scroll={{ x: '1500px' }}
+                  //   scroll={{ x: '1500px' }}
                   rowSelection={{
                     type: 'radio',
                     ...rowSelection,
@@ -1088,6 +1297,36 @@ const FormField: ISwapFormField = {
                   dataSource={this.state.listData}
                   loading={this.state.loading}
                   pagination={false}
+                  expandable={{
+                    expandedRowRender: returnChildrenTable,
+                    expandedRowKeys: this.state.expandedRowKeys,
+                    expandIcon: props => {
+                      const { expandedRowKeys } = this.state;
+                      const {
+                        record,
+                        record: { id },
+                        onExpand,
+                      } = props;
+                      const flag = expandedRowKeys.includes(id);
+                      const ICON = flag
+                        ? MinusSquareOutlined
+                        : PlusSquareOutlined;
+                      return (
+                        <ICON
+                          onClick={e => {
+                            onExpand(record, e);
+                          }}
+                        />
+                      );
+                    },
+                    onExpand: (expanded, record) => {
+                      console.log(expanded, record);
+                      const { id } = record;
+                      this.setState({
+                        expandedRowKeys: expanded ? [id] : [],
+                      });
+                    },
+                  }}
                 ></Table>
                 <Pagination
                   defaultCurrent={1}
@@ -1113,7 +1352,7 @@ const FormField: ISwapFormField = {
                   }}
                 />
                 <Table
-                  scroll={{ x: '1500px' }}
+                  //   scroll={{ x: '1500px' }}
                   rowSelection={{
                     type: 'radio',
                     ...rowSelection,
@@ -1137,7 +1376,7 @@ const FormField: ISwapFormField = {
           </Modal>
           {/* 树形 */}
 
-          <Modal className="isvzhukuaiwarehousing" 
+          <Modal className="isvzhukuaizkpd" 
             title="选择物资"
             width={1000}
             visible={this.state.isModalVisibletree}

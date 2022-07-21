@@ -638,7 +638,7 @@ const FormField: ISwapFormField = {
             />
           </div>
 
-          <Modal className="isvzhukuaiwarehousing" 
+          <Modal className="isvzhukuaizkpd" 
             title="选择项目"
             width={1000}
             visible={this.state.isModalVisible}

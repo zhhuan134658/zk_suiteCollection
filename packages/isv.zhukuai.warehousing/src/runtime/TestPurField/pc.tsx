@@ -777,9 +777,6 @@ const FormField: ISwapFormField = {
       this.asyncSetFieldProps(treedata);
     };
 
-    const onExpand = () => {
-      //console.log('Trigger Expand');
-    };
     const Tabschange = key => {
       //console.log(key);
       const newpage = {
@@ -954,7 +951,7 @@ const FormField: ISwapFormField = {
                   opacity: 0.15,
                 }}
               >
-                {'Version: 3.1.4'}
+                {'Version: 3.1.5'}
               </div>
               <div style={{ color: '#409EFF', cursor: 'pointer' }}>
                 <Popconfirm
@@ -1162,7 +1159,7 @@ const FormField: ISwapFormField = {
                   defaultExpandedKeys={['0']}
                   blockNode
                   onSelect={onSelect}
-                  onExpand={onExpand}
+                  //   onExpand={onExpand}
                   treeData={this.state.treeData}
                 />
               </Sider>
