@@ -1,73 +1,145 @@
 import 'dingtalk-jsapi/entry/union';
 import * as dd from 'dingtalk-jsapi'; // 此方式为整体加载，也可按需进行加载
 import React from 'react';
-import {
-  Tabs,
-  notification,
-  Table,
-  Tooltip,
-  Modal,
-  Input,
-  Button,
-  Popconfirm,
-  Layout,
-  Pagination,
-  Tree,
-} from 'antd';
+import { Input, Popconfirm } from 'antd';
 
 import { asyncSetProps } from '../../utils/asyncSetProps';
-import { ColumnTypes, DataType, ISwapFormField } from '../../types/runtime';
+import { ISwapFormField } from '../../types/runtime';
+import { CustomField } from '../../components/customField';
 
 const FormField: ISwapFormField = {
   getInitialState() {
     return {
       state: 1,
+      allData: {
+        type: '',
+        pageSize: 10,
+        page: 1,
+        name: '', // 搜索value
+        supplier_type: '', // 树结构type
+      },
     };
+  },
+  fieldDidMount() {
+    const { form } = this.props;
+    const field = form.getFieldInstance('TestPurTables');
+    const getProp = field.getProp();
+    const getValue = field.getValue();
+    const getExtendValue = field.getExtendValue();
+    console.log(getProp, getValue, getExtendValue, 'cccccccccccccccc');
+    form.onFieldExtendValueChange('TestPurTables', value => {
+      console.log(value, 'aaaaaaaaaaaaaaaaaaaa');
+    });
+    form.onFieldValueChange('TestPurTables', value => {
+      console.log(value, 'vbbbbbbbbbbbbb', getValue);
+    });
+    // const dataSourceRun = [
+    //   {
+    //     name: '1234',
+    //     number: 1,
+    //   },
+    //   {
+    //     name: '4321',
+    //     number: 2,
+    //   },
+    // ];
+    // dataSourceRun.map((item: any, index) => {
+    //   const {
+    //     name,
+    //     number,
+    //     // unit,
+    //     // size,
+    //     // det_quantity,
+    //     // no_unit_price,
+    //     // unit_price,
+    //     // tax_rate,
+    //     // tax_amount,
+    //     // no_amount_tax,
+    //     // amount_tax,
+    //     // quantity_rk,
+    //     // quantity_zong,
+    //   } = item;
+    //   const newlist = [
+    //     { key: 'name', value: name || '' },
+    //     { key: 'number', value: number || '' },
+    //     // { key: 'unit', value: unit || '' },
+    //     // { key: 'size', value: size || '' },
+    //     // { key: 'det_quantity', value: det_quantity || '' },
+    //     // { key: 'no_unit_price', value: no_unit_price || '' },
+    //     // { key: 'unit_price', value: unit_price || '' },
+    //     // { key: 'tax_rate', value: tax_rate || '' },
+    //     // { key: 'tax_amount', value: tax_amount || '' },
+    //     // { key: 'no_amount_tax', value: no_amount_tax || '' },
+    //     // { key: 'amount_tax', value: amount_tax || '' },
+    //     // { key: 'quantity_rk', value: quantity_rk || '' },
+    //     // { key: 'quantity_zong', value: quantity_zong || '' },
+    //   ];
+    //   //   console.log(newlist, 'newlist');
+    //   field.tbody.add(newlist);
+    //   //   console.log('77777', field.tbody);
+    // });
   },
   methods() {
     return {
-      ResetClick: () => {
-        this.setState(
+      addSelfTable: (): void => {
+        console.log('add');
+        const { form } = this.props;
+        const field = form.getFieldInstance('TestPurTables');
+
+        // const { dataSourceRun } = this.state;
+        const dataSourceRun = [
           {
-            state: 2,
+            name: '1234',
+            number: 1,
           },
-          () => {
-            console.log(this.state.state);
+          {
+            name: '4321',
+            number: 2,
           },
-        );
-      },
-      onChange: e => {
-        console.log(e.target.value);
-      },
-      SetStates: () => {
-        this.setState({});
-      },
-      openSolidModal: () => {
-        dd.ready(function () {
-          dd.biz.util.openSlidePanel({
-            url: 'about:blank', //打开侧边栏的url
-            title: 'title', //侧边栏顶部标题
-            onSuccess: function (result) {
-              /*
-            调用biz.navigation.quit接口进入onSuccess, result为调用biz.navigation.quit传入的数值
-        */
-            },
-            onFail: function () {
-              /*
-            tips:点击右上角上角关闭按钮会进入onFail
-         */
-            },
-          });
+        ];
+        dataSourceRun.map((item: any, index) => {
+          const {
+            name,
+            number,
+            // unit,
+            // size,
+            // det_quantity,
+            // no_unit_price,
+            // unit_price,
+            // tax_rate,
+            // tax_amount,
+            // no_amount_tax,
+            // amount_tax,
+            // quantity_rk,
+            // quantity_zong,
+          } = item;
+          const newlist = [
+            { key: 'name', value: name || '' },
+            { key: 'number', value: number || '' },
+            // { key: 'unit', value: unit || '' },
+            // { key: 'size', value: size || '' },
+            // { key: 'det_quantity', value: det_quantity || '' },
+            // { key: 'no_unit_price', value: no_unit_price || '' },
+            // { key: 'unit_price', value: unit_price || '' },
+            // { key: 'tax_rate', value: tax_rate || '' },
+            // { key: 'tax_amount', value: tax_amount || '' },
+            // { key: 'no_amount_tax', value: no_amount_tax || '' },
+            // { key: 'amount_tax', value: amount_tax || '' },
+            // { key: 'quantity_rk', value: quantity_rk || '' },
+            // { key: 'quantity_zong', value: quantity_zong || '' },
+          ];
+          console.log(field.tbody, 'field.tbody');
+          //   console.log(newlist, 'newlist');
+          //   field.tbody.add(newlist);
+          //   console.log('77777', field.tbody);
         });
       },
     };
   },
-  asyncSetFieldProps(data: any) {
-    const _this = this;
-    const bizAlias = 'TestCdy';
-    const promise = asyncSetProps(_this, data, bizAlias);
-    promise.then(res => {
-      console.log('TESTCDY', res);
+  asyncSetFieldProps() {
+    const { allData } = this.state;
+    asyncSetProps(this, allData, 'TestCdy').then(res => {
+      console.log(res, 'asd');
     });
   },
   fieldDidUpdate() {},
@@ -77,82 +149,11 @@ const FormField: ISwapFormField = {
     const label = form.getFieldProp('TestCdy', 'label');
     const required = form.getFieldProp('TestCdy', 'required');
     return (
-      <div className="TestPurField_class">
-        <div className="pc-custom-field-wrap">
-          <div>
-            <div
-              className="label"
-              style={{ display: 'flex', justifyContent: 'space-between' }}
-            >
-              <div>
-                {required ? (
-                  <span style={{ color: '#ea6d5c' }}>*</span>
-                ) : (
-                  <span style={{ color: '#fff' }}>*</span>
-                )}
-                {label}
-              </div>
-              <div
-                style={{
-                  position: 'fixed',
-                  bottom: 0,
-                  right: 0,
-                  opacity: 0.15,
-                }}
-              >
-                {'Version: 3.1.2'}
-              </div>
-              <div style={{ color: '#409EFF', cursor: 'pointer' }}>
-                <Popconfirm
-                  title="是否重置？重置后明细表格将清空。"
-                  onConfirm={this.methods().ResetClick}
-                  okText="是"
-                  cancelText="否"
-                >
-                  <span>重置明细</span>
-                </Popconfirm>
-              </div>
-            </div>
-          </div>
-
-          <div onClick={this.methods().ResetClick}>修改state</div>
-
-          <div style={{ marginTop: '10px' }}>state:{this.state.state}</div>
-          <div>
-            <Input placeholder="testcdy" onChange={this.methods().onChange} />
-          </div>
-
-          <div onClick={this.methods().openSolidModal}>打开侧边面板</div>
-        </div>
-      </div>
+      <CustomField required={required} label={label}>
+        <div>测试明细</div>
+        <div onClick={this.methods().addSelfTable}>addbaioge</div>
+      </CustomField>
     );
-  },
-  suiteDidMount: function () {
-    throw new Error('Function not implemented.');
-  },
-  handleOk: function (): void {
-    throw new Error('Function not implemented.');
-  },
-  handleCancel: function (): void {
-    throw new Error('Function not implemented.');
-  },
-  onExtraClick: function (): void {
-    throw new Error('Function not implemented.');
-  },
-  onOpenChange: function (): void {
-    throw new Error('Function not implemented.');
-  },
-  onCancel: function (): void {
-    throw new Error('Function not implemented.');
-  },
-  onSearchBarChange: function (value: any): void {
-    throw new Error('Function not implemented.');
-  },
-  onSubmit: function (value: any): void {
-    throw new Error('Function not implemented.');
-  },
-  habdlClick: function (item: any): void {
-    throw new Error('Function not implemented.');
   },
 };
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Popconfirm } from 'antd';
 import './index.less';
 
@@ -11,9 +11,11 @@ const SelectBtn: React.FC<{
   popconfirmTitle?: String;
   okText?: String;
   cancelText?: String;
+  required?: Boolean;
+  showTitle?: Boolean;
 }> = props => {
   const {
-    title: titles,
+    title,
     initSelect,
     resetSelect,
     deleteSelect,
@@ -21,12 +23,9 @@ const SelectBtn: React.FC<{
     popconfirmTitle,
     okText,
     cancelText,
+    required = false,
+    showTitle = false,
   } = props;
-  const [title, setTitle] = useState(titles);
-
-  useEffect(() => {
-    setTitle(titles);
-  }, [titles]);
 
   // 请选择
   const initSelects = (): void => {
@@ -53,7 +52,7 @@ const SelectBtn: React.FC<{
     <div className="selectBtn">
       {title ? (
         <>
-          <div>{title}</div>
+          {showTitle && <div>{title || ''}</div>}
           <div className="primaryFont marginLeft" onClick={resetSelects}>
             重新选择
           </div>
@@ -74,7 +73,7 @@ const SelectBtn: React.FC<{
         </>
       ) : (
         <div className="primaryFont" onClick={initSelects}>
-          请选择
+          {required && <span className="required">*</span>}请选择
         </div>
       )}
     </div>

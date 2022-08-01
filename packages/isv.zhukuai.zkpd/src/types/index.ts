@@ -116,15 +116,15 @@ export interface ISuiteRuntime {
 
 export interface IFormField {
   props?: IProps;
-  getInitialState: () => void;
-  onExtraClick: () => void;
-  onCancel: () => void;
-  onSubmit: (value: any) => void;
-  onSearchBarChange: (value: any) => void;
-  habdlClick: (item: any) => void;
-  onOpenChange: (args: any) => void;
+  getInitialState?: () => void;
+  onExtraClick?: () => void;
+  onCancel?: () => void;
+  onSubmit?: (value: any) => void;
+  onSearchBarChange?: (value: any) => void;
+  habdlClick?: (item: any) => void;
+  onOpenChange?: (args: any) => void;
   fieldWillMount?: () => void;
-  asyncSetFieldProps: (vlauedata: any) => void;
+  asyncSetFieldProps?: (vlauedata: any) => void;
   fieldDidMount?: () => void;
   fieldDidUpdate?: () => void;
   fieldRender?: () => React.ReactElement;

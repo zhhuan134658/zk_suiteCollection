@@ -32,8 +32,15 @@ const HandledDetailDialogMobile: React.FC<{
   onFinish: (values: any) => void;
   onFinishFailed: (errorInfo: any) => void;
   showElem?: string;
+  positionStyle?: { [key: string]: any };
 }> = props => {
-  const { cascadeData, onFinish, onFinishFailed, showElem } = props;
+  const {
+    cascadeData,
+    onFinish,
+    onFinishFailed,
+    showElem,
+    positionStyle = {},
+  } = props;
   const [visible, setVisible] = React.useState(false);
   const [cascadeVisible, setCascadeVisible] = React.useState(false);
   const [cascadeValue, setCascadeValue] = React.useState([]);
@@ -122,7 +129,7 @@ const HandledDetailDialogMobile: React.FC<{
             setVisible(true);
           }}
           type="primary"
-          style={setButtonStyle()}
+          style={{ ...setButtonStyle(), ...positionStyle }}
         >
           <AddOutline fontSize={32} />
         </Button>,

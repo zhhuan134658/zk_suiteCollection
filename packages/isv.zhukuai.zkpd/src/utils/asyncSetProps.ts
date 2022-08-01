@@ -1,8 +1,9 @@
 import { refreshDataResolve, resRefreshData } from '../types/Response';
+import { NewPage } from '../types/runtime';
 
 const asyncSetProps = async (
   _this: any,
-  value: any,
+  params: NewPage,
   bizAlias: string,
   biaoName?: string,
   altProjectName?: string,
@@ -11,50 +12,57 @@ const asyncSetProps = async (
   const { form, spi } = _this.props;
   const projectBizAlias = projectBiz ? projectBiz : 'Autopro';
   const ProjectName = form.getFieldValue(projectBizAlias);
-  console.log('123456', projectBizAlias, ProjectName, form);
-  value.project_name = ProjectName;
-  const biz = bizAlias;
-  if (altProjectName) {
-    value.project_name = altProjectName;
-  }
-  if (biaoName) {
-    value.biao_name = biaoName;
-  }
-  const keyField = form.getFieldInstance(biz);
+
+  params.project_name = ProjectName;
+  altProjectName && (params.project_name = altProjectName);
+  biaoName && (params.biao_name = biaoName);
+  const keyField = form.getFieldInstance(bizAlias);
   const key = keyField.getProp('id');
-  const bizAsyncData = [
-    {
-      key,
-      bizAlias: biz,
-      extendValue: value,
-      value: '1',
-    },
-  ];
-  console.log(bizAsyncData, 'bizAsyncData');
+
   try {
     const promise = await spi.refreshData({
-      modifiedBizAlias: [biz],
-      bizAsyncData,
+      modifiedBizAlias: [bizAlias],
+      bizAsyncData: [
+        {
+          key,
+          bizAlias,
+          extendValue: params,
+          value: '1',
+        },
+      ],
     });
     const res: resRefreshData = promise;
-    // console.log(
-    //   res,
-    //   '11111111111111111111',
-    //   JSON.parse(res?.dataList[0]?.value),
-    // );
-    const resolveData: refreshDataResolve = {
-      dataArray: undefined,
-      extendArray: undefined,
-      currentPage: undefined,
-      totalCount: undefined,
-      message: undefined,
-    };
+    console.log(
+      'BIZALIAS_RESULT',
+      bizAlias,
+      JSON.parse(res?.dataList[0]?.value),
+    );
+
     try {
-      resolveData.dataArray = JSON.parse(res?.dataList[0]?.value).data;
-      resolveData.currentPage = JSON.parse(res?.dataList[0]?.value).page;
-      //   resolveData.extendArray = JSON.parse(res?.dataList[0]?.extendValue);
-      resolveData.totalCount = JSON.parse(res?.dataList[0]?.value).count;
-      //   resolveData.message = JSON.parse(res?.dataList[0]?.value).msg;
+      const {
+        data = [],
+        page = 1,
+        count = 0,
+        type = '',
+        list = [],
+        typeList = [],
+        optionNature = [],
+        extendArray = [],
+        pageSize = 10,
+        success = undefined,
+        message = undefined,
+      } = JSON.parse(res?.dataList[0]?.value);
+      const resolveData: refreshDataResolve = {
+        success,
+        message,
+        page,
+        count,
+        type,
+        list,
+        typeList,
+        pageSize,
+        optionNature,
+      };
       return resolveData;
     } catch (e) {
       throw new Error(e);
@@ -85,7 +93,7 @@ const uploadAsyncSetProps = async (
       resolveData.uploadData = res.dataArray;
       break;
     case 'ModelType':
-      resolveData.modelUrl = res.dataArray[0]['url'];
+      resolveData.modelUrl = res.dataArray[0]?.['url'] || '';
       break;
     default:
       throw new Error('type error');

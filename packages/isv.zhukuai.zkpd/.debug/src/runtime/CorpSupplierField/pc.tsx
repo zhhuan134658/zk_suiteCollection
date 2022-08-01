@@ -15,10 +15,14 @@ import { CloseCircleOutlined } from '@ant-design/icons';
 import React from 'react';
 import { ISwapFormField, SimpleData } from '../../types/runtime';
 import { asyncSetProps } from '../../utils/asyncSetProps';
+import { SelectBtn } from '../../components/selectBtn/index';
+import { uniqueArrayByKey } from '../../utils/normalizeUtils';
+import { SelectSupplier } from '../../components/selectSupplier';
+
 const { Search } = Input;
 const { Sider, Content } = Layout;
 const { Option } = Select;
-import { uniqueArrayByKey } from '../../utils/normalizeUtils';
+
 const mycolumns = [
   {
     title: '单位名称',
@@ -54,12 +58,12 @@ const FormField: ISwapFormField = {
       msgdata: '',
       newOptine: [],
       Inputvalue: '',
-      current_page: '', //当前页
-      total2: '',
+      current_page: '',
+      total: '',
       allData: {
-        type: '0',
-        number: '10',
-        page: '1',
+        type: '',
+        pageSize: 10,
+        page: 1,
         name: '',
         supplier_type: '0',
       },
@@ -82,24 +86,37 @@ const FormField: ISwapFormField = {
       currentEditId: 0,
       currentSelectData: [],
       selectedRowKeys: [],
+
+      visible: false,
+      selectType: '',
+      companyName: '',
+      unitName: '',
     };
   },
-  asyncSetFieldProps(data: any) {
+  asyncSetFieldProps() {
     const _this = this;
-    const promise = asyncSetProps(_this, data, 'CorpSupplier');
+    const { msgdata, allData } = this.state;
+    const promise = asyncSetProps(_this, allData, 'CorpSupplier');
     promise.then(res => {
-      const dropDownData = [...res.extendArray.data];
+      const {
+        extendArray: { data },
+        page,
+        count,
+        message,
+        dataArray,
+      } = res;
+      const dropDownData = [...data];
       dropDownData.splice(0, 1);
       _this.setState({
-        listData: [...res.dataArray],
-        current_page: res.currentPage,
-        total2: res.totalCount,
-        treeData: [...res.extendArray.data],
+        listData: [...dataArray],
+        current_page: page,
+        total: count,
+        treeData: [...data],
         newOptine: [...dropDownData],
       });
-      if (_this.state.msgdata === '1') {
+      if (msgdata === '1') {
         notification.open({
-          message: res.message,
+          message,
         });
         _this.setState({
           msgdata: '0',
@@ -110,23 +127,83 @@ const FormField: ISwapFormField = {
   methods() {
     const _this = this;
     return {
+      addNewProject: (type: string): void => {
+        this.setState({
+          visible: true,
+          selectType: type,
+        });
+      },
+      deleteProject: (type: string): void => {
+        const newName = type + 'Name';
+        this.setState(
+          {
+            [newName]: '',
+          },
+          () => {
+            this.methods().saveResult();
+          },
+        );
+      },
+      callBackHandleOk: (rows): void => {
+        const { selectType } = this.state;
+        const newName = selectType + 'Name';
+
+        console.log(rows, 'rows');
+      },
+      callBackHandleCancel: (flag): void => {
+        this.setState({
+          visible: false,
+        });
+      },
+      callBackTreeSelect: (obj): void => {
+        this.setState(
+          {
+            allData: obj,
+          },
+          () => {
+            this.asyncSetFieldProps();
+          },
+        );
+      },
+      callBackChangePage: (obj): void => {
+        const { allData } = _this.state;
+        Object.assign(allData, obj);
+
+        this.setState(
+          {
+            allData,
+          },
+          () => {
+            this.asyncSetFieldProps();
+          },
+        );
+      },
       onSearch(value: string) {
-        const newData = _this.state.allData;
+        const { allData: newData } = _this.state;
+        // const newData = _this.state.allData;
         newData.name = value;
         newData.type = 0;
         newData.page = 1;
-        _this.setState({
-          allData: newData,
-        });
-        _this.asyncSetFieldProps(newData);
+        _this.setState(
+          {
+            allData: newData,
+          },
+          () => {
+            _this.asyncSetFieldProps();
+          },
+        );
       },
       onChangePage(page: any) {
-        const newPage = _this.state.allData;
+        const { allData: newPage } = _this.state;
         newPage.page = page;
-        _this.setState({
-          allData: newPage,
-        });
-        _this.asyncSetFieldProps(newPage);
+        _this.setState(
+          {
+            allData: newPage,
+          },
+          () => {
+            _this.asyncSetFieldProps();
+          },
+        );
       },
       handleChange(row: SimpleData) {
         _this.setState({
@@ -168,9 +245,19 @@ const FormField: ISwapFormField = {
         form.setFieldValue('CorpSupplier', '');
         form.setFieldExtendValue('CorpSupplier', '');
       },
+      saveResult() {
+        const { form } = _this.props;
+        const { companyName, unitName } = _this.state;
+        const obj = {
+          companyName,
+          unitName,
+        };
+        form.setFieldValue('CorpSupplier', obj);
+        form.setFieldExtendValue('CorpSupplier', obj);
+      },
       handleAdd() {
-        const newData = _this.state.allData;
-        _this.asyncSetFieldProps(newData);
+        //   const newData = _this.state.allData;
+        _this.asyncSetFieldProps();
         _this.setState({
           isModalVisible: true,
         });
@@ -208,33 +295,8 @@ const FormField: ISwapFormField = {
       selectedRowKeys: [],
     });
   },
-  fieldRender() {
-    const { form, runtimeProps } = this.props;
-    const { viewMode } = runtimeProps;
-    const field = form.getFieldInstance('CorpSupplier');
-    const label = form.getFieldProp('CorpSupplier', 'label');
-    const required = form.getFieldProp('CorpSupplier', 'required');
-    const onSelect = (keys: React.Key[], info: any) => {
-      console.log(info.node.key);
-      let treedata = {
-        supplier_type: '',
-        name: '',
-        number: '10',
-        page: '1',
-      };
-
-      treedata = {
-        supplier_type: info.node.key,
-        name: '',
-        number: '10',
-        page: '1',
-      };
-
-      this.setState({
-        allData: treedata,
-      });
-      this.asyncSetFieldProps(treedata);
-    };
+  fieldDidMount() {
+    const { form } = this.props;
     form.onFieldExtendValueChange('CorpSupplier', (value: string) => {
       if (this.state.Inputvalue !== value) {
         this.setState({
@@ -242,6 +304,60 @@ const FormField: ISwapFormField = {
         });
       }
     });
+  },
+  // 详情页
+  renderDetail(field, label) {
+    const value = field.getExtendValue() ? field.getExtendValue() : '';
+    return (
+      <div className="field-wrapper">
+        <div className="label" style={{ marginTop: '10px' }}>
+          {label}
+        </div>
+        {/* {data} */}
+
+        <div style={{ marginTop: '10px' }}> {value}</div>
+      </div>
+    );
+  },
+  fieldRender() {
+    const {
+      form,
+      runtimeProps: { viewMode },
+    } = this.props;
+    const field = form.getFieldInstance('CorpSupplier');
+    const label = form.getFieldProp('CorpSupplier', 'label');
+    const required = form.getFieldProp('CorpSupplier', 'required');
+    const onSelect = (keys: React.Key[], info: any) => {
+      console.log(info.node.key);
+      //   let treedata = {
+      //     supplier_type: '',
+      //     name: '',
+      //     pageSize: 10,
+      //     page: 1,
+      //   };
+      const treedata = {
+        supplier_type: info.node.key || '',
+        name: '',
+        pageSize: 10,
+        page: 1,
+      };
+
+      this.setState(
+        {
+          allData: treedata,
+        },
+        () => {
+          this.asyncSetFieldProps(treedata);
+        },
+      );
+    };
+    // form.onFieldExtendValueChange('CorpSupplier', (value: string) => {
+    //   if (this.state.Inputvalue !== value) {
+    //     this.setState({
+    //       Inputvalue: value,
+    //     });
+    //   }
+    // });
     const onExpand = () => {
       console.log('Trigger Expand');
     };
@@ -255,13 +371,18 @@ const FormField: ISwapFormField = {
         msgdata: '1',
       });
       console.log('Success:', values);
-      //   const [form] = Form.useForm();
       const newdate = this.state.allData;
       newdate.supplier_add = values;
-      this.asyncSetFieldProps(newdate);
-      this.setState({
-        visibleModal: false,
-      });
+      //   this.asyncSetFieldProps(newdate);
+      this.setState(
+        {
+          allData: newdate,
+          visibleModal: false,
+        },
+        () => {
+          this.asyncSetFieldProps();
+        },
+      );
       newdate.supplier_add = '';
 
       //   form.resetFields();
@@ -270,21 +391,7 @@ const FormField: ISwapFormField = {
       console.log('Failed:', errorInfo);
     };
 
-    // 详情页
-    if (viewMode) {
-      const value = field.getExtendValue() ? field.getExtendValue() : '';
-      return (
-        <div className="field-wrapper">
-          <div className="label" style={{ marginTop: '10px' }}>
-            {label}
-          </div>
-          {/* {data} */}
-
-          <div style={{ marginTop: '10px' }}> {value}</div>
-        </div>
-      );
-    }
-    return (
+    return !viewMode ? (
       <div className="CorpSupplier_class">
         <div className="pc-custom-field-wrap">
           <div className="label" style={{ marginTop: '10px' }}>
@@ -295,146 +402,37 @@ const FormField: ISwapFormField = {
             )}
             {label}
           </div>
-          <div>
-            <Input
-              readOnly
-              value={this.state.Inputvalue}
-              onClick={this.methods().handleAdd}
-              placeholder="请选择"
-              suffix={
-                <CloseCircleOutlined
-                  onClick={this.methods().iconClick}
-                  style={{ color: 'rgba(0,0,0,.45)' }}
-                />
-              }
-            />
-          </div>
 
-          <Modal className="isvzhukuaizkpd" 
-            title="选择供应商"
-            width={1000}
-            visible={this.state.isModalVisible}
-            footer={[
-              <Button key="back" onClick={this.handleCancel}>
-                返回
-              </Button>,
-              <Button
-                type="primary"
-                loading={this.state.loading}
-                onClick={this.handleOk}
-                key="ok"
-              >
-                确定
-              </Button>,
-            ]}
-            onCancel={this.handleCancel}
-          >
-            <Layout>
-              <Sider className="newside_new">
-                <Tree
-                  blockNode
-                  defaultExpandAll
-                  onSelect={onSelect}
-                  onExpand={onExpand}
-                  treeData={this.state.treeData}
-                />
-              </Sider>
-              <Content>
-                <div className="header_tab_class">
-                  <Search
-                    placeholder="请输入"
-                    allowClear
-                    enterButton="搜索"
-                    size="large"
-                    onSearch={this.methods().onSearch}
-                  />
-                  <Button
-                    onClick={this.methods().showModal}
-                    size="large"
-                    type="primary"
-                  >
-                    新增
-                  </Button>
-                </div>
+          {/* <div style={{ marginTop: '10px' }}>所属分公司</div> */}
+          <SelectBtn
+            key="company"
+            title={this.state.companyName}
+            initSelect={this.methods().addNewProject.bind(this, 'company')}
+            resetSelect={this.methods().addNewProject.bind(this, 'company')}
+            deleteSelect={this.methods().deleteProject.bind(this, 'company')}
+          />
 
-                <Table
-                  scroll={{ y: '255px' }}
-                  onRow={record => {
-                    return {
-                      onClick: this.methods().rowClick.bind(this, record),
-                    };
-                  }}
-                  rowKey={record => record.id}
-                  columns={mycolumns}
-                  dataSource={this.state.listData}
-                  loading={this.state.loading}
-                  pagination={false}
-                ></Table>
-                <Pagination
-                  defaultCurrent={1}
-                  total={this.state.total2}
-                  hideOnSinglePage={true}
-                  className="pagination"
-                  onChange={this.methods().onChangePage}
-                />
-              </Content>
-            </Layout>
-          </Modal>
-          {/* 新增个 */}
-          <Modal className="isvzhukuaizkpd" 
-            onCancel={this.methods().hideModal}
-            visible={this.state.visibleModal}
-            width={1000}
-            title="新增"
-            footer={null}
-          >
-            <Form
-              initialValues={{ remember: true }}
-              layout="vertical"
-              onFinish={onFinish}
-              onFinishFailed={onFinishFailed}
-            >
-              <Form.Item
-                label="单位名称"
-                name="name"
-                rules={[{ required: true, message: '请填写单位名称' }]}
-              >
-                <Input placeholder="请填写单位名称" />
-              </Form.Item>
-              <Form.Item
-                label="单位类型"
-                name="supplier_type"
-                rules={[{ required: true, message: '请填写单位类型' }]}
-              >
-                <Select placeholder="请填写单位类型" allowClear>
-                  {Options}
-                </Select>
-              </Form.Item>
-              <Form.Item
-                label="单位性质"
-                name="unit_nature"
-                rules={[{ required: true, message: '请填写单位性质' }]}
-              >
-                <Select placeholder="请填写单位性质" allowClear>
-                  <Option value="事业">事业</Option>
-                  <Option value="企业">企业</Option>
-                  <Option value="社团">社团</Option>
-                  <Option value="自然人">自然人</Option>
-                  <Option value="其他">其他</Option>
-                </Select>
-              </Form.Item>
-              <Form.Item className="newForm">
-                <Button type="primary" htmlType="submit">
-                  确认
-                </Button>
-                <Button type="primary" onClick={this.methods().hideModal}>
-                  取消
-                </Button>
-              </Form.Item>
-            </Form>
-          </Modal>
+          {/* <div style={{ marginTop: '10px' }}>建设单位</div>
+          <SelectBtn
+            key="unit"
+            title={this.state.unitName}
+            initSelect={this.methods().addNewProject.bind(this, 'unit')}
+            resetSelect={this.methods().addNewProject.bind(this, 'unit')}
+            deleteSelect={this.methods().deleteProject.bind(this, 'unit')}
+          /> */}
+
+          {/* 所属分公司 & 建设单位 */}
+          <SelectSupplier
+            visible={this.state.visible}
+            callBackHandleOk={this.methods().callBackHandleOk}
+            callBackHandleCancel={this.methods().callBackHandleCancel}
+            callBackTreeSelect={this.methods().callBackTreeSelect}
+            callBackChangePage={this.methods().callBackChangePage}
+          />
         </div>
       </div>
+    ) : (
+      <>{this.renderDetail(field, label)}</>
     );
   },
 };

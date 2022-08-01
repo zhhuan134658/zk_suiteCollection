@@ -1,0 +1,290 @@
+{
+  "name": "筑快OA swap-cli2.0",
+  "description": "筑快OA swap-cli2.0",
+  "icon": "",
+  "bizType": "isv.zhukuai.zkpd",
+  "templateType": "advanced",
+  "props": {},
+  "setters": [],
+  "children": [
+    {
+      "componentName": "SelectField",
+      "bizAlias": "Autopro",
+      "props": {
+        "required": false,
+        "placeholder": "请选择",
+        "label": "项目",
+        "asyncCondition": true,
+        "options": [
+          { "key": "1", "value": "是" },
+          { "key": "2", "value": "否" }
+        ]
+      }
+    },
+    {
+      "componentName": "TheirCompanyField",
+      "bizAlias": "theirCompany",
+      "props": {
+        "required": false,
+        "placeholder": "请选择",
+        "label": "所属分公司"
+      },
+      "type": "custom"
+    },
+    {
+      "componentName": "TextField",
+      "bizAlias": "company",
+      "props": {
+        "required": true,
+        "placeholder": "请输入",
+        "label": "所属分公司",
+        "maxLength": "100"
+      }
+    },
+    {
+      "componentName": "TheirUnitField",
+      "bizAlias": "theirUnit",
+      "props": {
+        "required": false,
+        "placeholder": "请选择",
+        "label": "建设单位"
+      },
+      "type": "custom"
+    },
+    {
+      "componentName": "TextField",
+      "bizAlias": "unit",
+      "props": {
+        "required": true,
+        "placeholder": "请输入",
+        "label": "建设单位",
+        "maxLength": "100"
+      }
+    },
+    {
+      "componentName": "CorpSupplierField",
+      "bizAlias": "CorpSupplier",
+      "props": {
+        "required": false,
+        "placeholder": "请选择",
+        "label": "供应商"
+      },
+      "type": "custom"
+    },
+    {
+      "componentName": "TextField",
+      "bizAlias": "supplier",
+      "props": {
+        "required": true,
+        "placeholder": "请输入",
+        "label": "供应商",
+        "maxLength": "100"
+      }
+    },
+
+    {
+      "componentName": "TestPurField",
+      "bizAlias": "TestPur",
+      "props": {
+        "placeholder": "请输入",
+        "label": "采购合同"
+      },
+      "type": "custom"
+    },
+    {
+      "componentName": "TableField",
+      "bizAlias": "TestPurTable",
+      "props": {
+        "actionName": "增加明细",
+        "tableViewMode": "table",
+        "placeholder": "请输入",
+        "label": "明细"
+      },
+      "children": [
+        {
+          "componentName": "TextField",
+          "bizAlias": "name",
+          "props": {
+            "disabled": true,
+            "placeholder": "请输入",
+            "label": "物资名称",
+            "id": "name"
+          }
+        },
+        {
+          "componentName": "TextField",
+          "bizAlias": "unit",
+          "props": {
+            "disabled": true,
+            "placeholder": "请输入",
+            "label": "单位",
+            "id": "unit"
+          }
+        },
+        {
+          "componentName": "TextField",
+          "bizAlias": "size",
+          "props": {
+            "disabled": true,
+            "placeholder": "请输入",
+            "label": "规格型号",
+            "id": "size"
+          }
+        },
+        {
+          "componentName": "TextField",
+          "bizAlias": "det_quantity",
+          "props": {
+            "disabled": true,
+            "placeholder": "请输入",
+            "label": "数量",
+            "id": "det_quantity"
+          }
+        },
+        {
+          "componentName": "TextField",
+          "bizAlias": "no_unit_price",
+          "props": {
+            "disabled": true,
+            "placeholder": "请输入",
+            "label": "不含税单价(元)",
+            "id": "no_unit_price"
+          }
+        },
+        {
+          "componentName": "TextField",
+          "bizAlias": "unit_price",
+          "props": {
+            "disabled": true,
+            "placeholder": "请输入",
+            "label": "含税单价(元)",
+            "id": "unit_price"
+          }
+        },
+        {
+          "componentName": "TextField",
+          "bizAlias": "tax_rate",
+          "props": {
+            "disabled": true,
+            "placeholder": "请输入",
+            "label": "税率(%)",
+            "id": "tax_rate"
+          }
+        },
+        {
+          "componentName": "NumberField",
+          "bizAlias": "tax_amount",
+          "props": {
+            "disabled": false,
+            "placeholder": "请输入",
+            "label": "税额(元)",
+            "id": "tax_amount"
+          }
+        },
+        {
+          "componentName": "NumberField",
+          "bizAlias": "no_amount_tax",
+          "props": {
+            "disabled": false,
+            "placeholder": "请输入",
+            "label": "不含税金额(元)",
+            "id": "no_amount_tax"
+          }
+        },
+        {
+          "componentName": "NumberField",
+          "bizAlias": "amount_tax",
+          "props": {
+            "disabled": false,
+            "placeholder": "请输入",
+            "label": "含税金额(元)",
+            "id": "amount_tax"
+          }
+        },
+        {
+          "componentName": "TextField",
+          "bizAlias": "quantity_rk",
+          "props": {
+            "disabled": true,
+            "placeholder": "请输入",
+            "label": "已入库量",
+            "id": "quantity_rk"
+          }
+        },
+        {
+          "componentName": "TextField",
+          "bizAlias": "quantity_zong",
+          "props": {
+            "disabled": true,
+            "placeholder": "请输入",
+            "label": "总计划量",
+            "id": "quantity_zong"
+          }
+        }
+      ]
+    },
+    {
+      "componentName": "TextField",
+      "bizAlias": "noAmountTax",
+      "props": {
+        "required": true,
+        "maxLength": "100",
+        "notUpper": "0",
+        "formula": [
+          {
+            "id": "no_amount_tax"
+          }
+        ],
+        "label": "不含税金额合计(元)",
+        "placeholder": "自动计算数值"
+      }
+    },
+    {
+      "componentName": "TextField",
+      "bizAlias": "amountTax",
+      "props": {
+        "required": true,
+        "maxLength": "100",
+        "notUpper": "0",
+        "formula": [
+          {
+            "id": "amount_tax"
+          }
+        ],
+        "label": "含税金额合计(元)",
+        "placeholder": "自动计算数值"
+      }
+    },
+
+    {
+      "componentName": "TextField",
+      "bizAlias": "theirProject",
+      "props": {
+        "required": true,
+        "placeholder": "请输入",
+        "label": "所属项目",
+        "maxLength": "100"
+      }
+    },
+    {
+      "componentName": "TextField",
+      "bizAlias": "singleLineText",
+      "props": {
+        "required": true,
+        "placeholder": "请输入",
+        "label": "单行文本输入框",
+        "maxLength": "100"
+      }
+    },
+    {
+      "componentName": "AddressField",
+      "bizAlias": "Address",
+      "props": {
+        "id": "",
+        "required": true,
+        "label": "项目地址",
+        "needDetail": true
+      }
+    }
+  ]
+}

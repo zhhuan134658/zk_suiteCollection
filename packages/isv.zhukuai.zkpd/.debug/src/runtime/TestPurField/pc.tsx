@@ -14,8 +14,18 @@ import {
   Pagination,
   Tree,
 } from 'antd';
-import { CloseCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { ColumnTypes, DataType, ISwapFormField } from '../../types/runtime';
+import {
+  CloseCircleOutlined,
+  QuestionCircleOutlined,
+  PlusSquareOutlined,
+  MinusSquareOutlined,
+} from '@ant-design/icons';
+import {
+  ColumnTypes,
+  DataType,
+  ISwapFormField,
+  NewPage,
+} from '../../types/runtime';
 import { searchBarSubmitRK } from '../../utils/searchUtils';
 import { changePage } from '../../utils/pageUtils';
 import {
@@ -34,9 +44,10 @@ import { DetailDialogDesktop } from '../../components/addDetail';
 import { uniqueArrayByKey } from '../../utils/normalizeUtils';
 
 import { SelectBtn } from '../../components/selectBtn/index';
-import { PlusSquareOutlined, MinusSquareOutlined } from '@ant-design/icons';
+import { PaginationBox } from '../../components/paginationBox/index';
 
 import './pc.less';
+import { arrayOf } from 'prop-types';
 
 const { Search } = Input;
 const { TabPane } = Tabs;
@@ -65,7 +76,7 @@ const myColumns = [
   {
     title: '操作',
     dataIndex: 'operation',
-    // width: 100,
+    width: 100,
     ellipsis: true,
     render: (_, record: any) => (
       <a
@@ -80,7 +91,7 @@ const myColumns = [
           })
         }
       >
-        查看详情查看详情查看详情查看详情查看详情查看详情查看详情查看详情查看详情查看详情查看详情查看详情查看详情查看详情查看详情查看详情
+        查看详情
       </a>
     ),
   },
@@ -178,27 +189,35 @@ const FormField: ISwapFormField = {
     return {
       infourl: '',
       detailPage: 1,
-      defaultActiveKey: 'a',
+      defaultActiveKey: 'purchase_Apply_For',
       value: undefined,
       msgdata: '',
       newOptine: [],
       visibleModal: false,
-      detdate: 'a1',
-      dstatus: '1',
+      //   dstatus: '1',
       detailname: '',
       Inputmoney2: '',
       Inputmoney1: '', // 含税
       current_page: '',
       total2: '',
       allData: {
-        rk_id: ['a'],
-        number: '10',
-        page: '1',
+        type: '',
+        pageSize: 10,
+        page: 1,
         name: '',
       },
       isModalVisible: false,
       isModalVisibletree: false,
+
+      // 采购清单
       listData: [],
+      dataSource: [],
+
+      // 材料总计划
+      materialSource: [],
+      materialSourceRun: [],
+
+      dataSourceRun: [], // 基础表格数据渲染
 
       treeData: [],
       pagination: {
@@ -209,8 +228,6 @@ const FormField: ISwapFormField = {
       loading: false,
       leaveLongVal: '',
 
-      //   dataSource: [],
-      dataSource: [],
       count: 1,
       fixedColumn: '',
       currentEditId: 0,
@@ -225,17 +242,26 @@ const FormField: ISwapFormField = {
   methods() {
     const _this = this;
     return {
-      addNewDetail() {
+      returnDetailName(detailname: string = ''): string {
+        const { defaultActiveKey } = _this.state;
+        const selectBtnTitle: string = detailname
+          ? defaultActiveKey === 'purchase_Apply_For'
+            ? `采购申请-${detailname}`
+            : `材料总计划-${detailname}`
+          : '';
+        return selectBtnTitle;
+      },
+      addNewDetail(): void {
         _this.setState({
           visibleModal: true,
         });
       },
-      handleModalCancel() {
+      handleModalCancel(): void {
         _this.setState({
           visibleModal: false,
         });
       },
-      handleSetTableData(data: Array<any>) {
+      handleSetTableData(data: Array<any>): void {
         const sourceData = [..._this.state.dataSource];
         let newData = [];
         if (sourceData && sourceData.length > 0) {
@@ -256,8 +282,17 @@ const FormField: ISwapFormField = {
       handleSearch(value: any, rk_id: string) {
         searchBarSubmitRK(_this, value, rk_id);
       },
-      handleChangePage(page: any) {
-        changePage(_this, page);
+      handleChangePage(page: number, pageSize: number, type: string) {
+        const { allData } = _this.state;
+        Object.assign(allData, { page, pageSize, type });
+        _this.setState(
+          {
+            allData,
+          },
+          () => {
+            _this.asyncSetFieldProps();
+          },
+        );
       },
       handleTreeChangePage(page: any) {
         _this.setState({ detailPage: page });
@@ -270,13 +305,14 @@ const FormField: ISwapFormField = {
       },
       ResetClick() {
         _this.setState({
-          dataSource: [],
           Inputmoney2: 0,
           Inputmoney1: 0,
           detailname: '',
           selectedRowKeys: [],
           expandedRowKeys: [],
           childrenRowKeys: [],
+          dataSource: [],
+          dataSourceRun: [],
         });
       },
       iconClick() {
@@ -309,7 +345,7 @@ const FormField: ISwapFormField = {
           let newInputmoney2 = 0;
           newDataSource.forEach(item => {
             /**
-             *  amount_tax 含税金额
+             * amount_tax 含税金额
              * no_amount_tax  不含税金额
              */
             const { amount_tax, no_amount_tax } = item;
@@ -319,29 +355,34 @@ const FormField: ISwapFormField = {
           this.setState({
             childrenRowKeys: removeChildId,
             dataSources: newDataSource,
+            Inputmoney2: newInputmoney2,
+            Inputmoney1: newInputmoney1,
           });
         }
 
         // deleteRowForTaxCalcTables(_this, row);
       },
       handleProjectAdd() {
-        const newData = _this.state.defaultActiveKey;
-        _this.setState({
-          dstatus: '1',
-        });
+        const { defaultActiveKey } = _this.state;
         const newPage = {
-          rk_id: [newData],
-          number: '10',
+          type: defaultActiveKey,
+          pageSize: 10,
           page: 1,
           name: '',
         };
-        _this.setState({
-          allData: newPage,
-        });
-        _this.asyncSetFieldProps(newPage);
-        _this.setState({
-          isModalVisible: true,
-        });
+        _this.setState(
+          {
+            allData: newPage,
+            dataSource: [],
+            dataSourceRun: [],
+          },
+          () => {
+            _this.asyncSetFieldProps();
+            _this.setState({
+              isModalVisible: true,
+            });
+          },
+        );
       },
       handleDetailAdd() {
         const { form } = _this.props;
@@ -351,20 +392,23 @@ const FormField: ISwapFormField = {
             message: '请先选择项目',
           });
         }
-        _this.setState({
-          dstatus: '2',
-        });
         const newpage = {
-          rk_id: ['-1'],
-          number: '10',
+          type: 'material_Info',
+          pageSize: 10,
           page: _this.state.detailPage,
           name: '',
         };
-        console.log('添加明细', newpage);
-        _this.asyncSetFieldProps(newpage);
-        _this.setState({
-          isModalVisibletree: true,
-        });
+        _this.setState(
+          {
+            allData: newpage,
+          },
+          () => {
+            _this.asyncSetFieldProps();
+            _this.setState({
+              isModalVisibletree: true,
+            });
+          },
+        );
       },
       handleSave(row: DataType, values: any) {
         const dataList = _this.state.dataSource;
@@ -416,34 +460,92 @@ const FormField: ISwapFormField = {
       setExpandedRowKeys(record) {
         console.log(record, 'recordasdasdasdasdasdasdasdasdas');
       },
+      addSelfTable() {
+        const { form } = _this.props;
+        const field = form.getFieldInstance('TestPurTable');
+
+        const { dataSourceRun } = _this.state;
+        dataSourceRun.map((item: any, index) => {
+          const {
+            name,
+            unit,
+            size,
+            det_quantity,
+            no_unit_price,
+            unit_price,
+            tax_rate,
+            tax_amount,
+            no_amount_tax,
+            amount_tax,
+            quantity_rk,
+            quantity_zong,
+          } = item;
+          const newlist = [
+            { key: 'name', value: name || '' },
+            { key: 'unit', value: unit || '' },
+            { key: 'size', value: size || '' },
+            { key: 'det_quantity', value: det_quantity || '' },
+            { key: 'no_unit_price', value: no_unit_price || '' },
+            { key: 'unit_price', value: unit_price || '' },
+            { key: 'tax_rate', value: tax_rate || '' },
+            { key: 'tax_amount', value: tax_amount || '' },
+            { key: 'no_amount_tax', value: no_amount_tax || '' },
+            { key: 'amount_tax', value: amount_tax || '' },
+            { key: 'quantity_rk', value: quantity_rk || '' },
+            { key: 'quantity_zong', value: quantity_zong || '' },
+          ];
+          console.log(newlist, 'newlist');
+          field.tbody.add(newlist);
+          console.log('77777', field.tbody);
+        });
+      },
     };
   },
   handleOk() {
-    // this.setState({ dstatus: '3' });
-    // const cDataid = [...this.state.currentSelectDataid];
-    // const newData = this.state.allData;
-    // newData.rk_id = [this.state.detdate, ...cDataid];
-    // this.asyncSetFieldProps(newData);
-
-    this.setState({
-      isModalVisible: false,
-      //   selectedRowKeys: [],
-    });
+    const { dataSource, defaultActiveKey, materialSourceRun } = this.state;
+    const arr =
+      defaultActiveKey === 'purchase_Apply_For'
+        ? [...dataSource]
+        : [...materialSourceRun];
+    this.setState(
+      {
+        isModalVisible: false,
+        dataSourceRun: arr,
+        selectedRowKeys: [],
+        expandedRowKeys: [],
+        childrenRowKeys: [],
+      },
+      () => {
+        this.methods().addSelfTable();
+      },
+    );
   },
   handleCancel() {
-    this.setState({ isModalVisible: false });
-    // this.setState({ isModalVisible: false, selectedRowKeys: [] });
+    this.setState({
+      isModalVisible: false,
+      selectedRowKeys: [],
+      expandedRowKeys: [],
+      childrenRowKeys: [],
+    });
   },
-  asyncSetFieldProps(data: any) {
+  asyncSetFieldProps(data?: NewPage) {
     const _this = this;
+    const { allData } = this.state;
+    console.log(allData, 'allData');
     const bizAlias = 'TestPur';
-    const promise = asyncSetProps(_this, data, bizAlias, 'material_contract');
-    const { dstatus } = this.state;
+    const promise = asyncSetProps(
+      _this,
+      allData,
+      bizAlias,
+      'material_contract',
+    );
+
     promise
       .then(res => {
-        // console.log('ASYNC', res);
-        const { dataArray } = res;
-        if (dstatus === '1') {
+        console.log('ASYNC', res);
+        const { dataArray, page, count, type } = res;
+        if (type === 'purchase_Apply_For') {
+          // 采购申请
           dataArray.forEach(item => {
             const { id, childrens } = item;
             const lg = childrens.length || 0;
@@ -456,10 +558,16 @@ const FormField: ISwapFormField = {
           console.log(dataArray, 'dataArray');
           this.setState({
             listData: dataArray,
-            current_page: res.currentPage || 0,
-            total2: res.totalCount || 0,
+            current_page: page || 1,
+            total2: count || 0,
           });
+        } else if (type === 'Material_master_plan') {
+          // 材料总计划 materialSource
+          console.log();
+        } else if (type === 'material_Info') {
+          // 物资明细
         }
+
         // const treeArray = [
         //   {
         //     title: '物资类型',
@@ -515,51 +623,12 @@ const FormField: ISwapFormField = {
         console.log('ASYNC ERROR', e);
       });
   },
-  fieldDidUpdate() {
-    if (!this.props.runtimeProps.viewMode) {
-      const { form } = this.props;
-      //console.log('发起页：fieldDidUpdate');
-      const editData = {
-        hanmoney: 0,
-        nomoney: 0,
-        detailname: '',
-        infourl: '',
-        detailedData: [], //物资明细
-      };
-      if (this.state.Inputmoney1) {
-        editData.hanmoney = Number(this.state.Inputmoney1);
-        console.log('Inputmoney2', this.state.Inputmoney1);
-        form.setFieldValue('CaiConMoney', Number(this.state.Inputmoney1));
-        form.setFieldExtendValue('CaiConMoney', Number(this.state.Inputmoney1));
-      }
-      if (this.state.infourl) {
-        editData.infourl = this.state.infourl;
-      }
-      if (this.state.Inputmoney2) {
-        editData.nomoney = Number(this.state.Inputmoney2);
-      }
-      editData.detailname = this.state.detailname;
-      editData.detailedData = this.state.dataSource;
-      const newlistdata = this.state.dataSource;
-      const str2 = this.state.detailname;
-      const str1 = `不含税金额合计(元)：${this.state.Inputmoney2}\n 含税金额合计(元)：${this.state.Inputmoney1}`;
-      const str = str2 + parsePrintString(newlistdata, purColumns, str1);
-      console.log(str);
-
-      form.setFieldValue('TestPur', str);
-      form.setFieldExtendValue('TestPur', editData);
-    }
-  },
-  fieldRender() {
+  fieldDidMount() {
     const { form } = this.props;
-    const field = form.getFieldInstance('TestPur');
+    /* 监听‘所属项目’START */
     const label = form.getFieldProp('TestPur', 'label');
-    const required = form.getFieldProp('TestPur', 'required');
-
     const selectAutoPro = form.getFieldInstance('Autopro');
     const initValue = selectAutoPro.getValue();
-
-    /* 监听‘所属项目’START */
     const _this = this;
     form.onFieldExtendValueChange('Autopro', (value: any) => {
       console.log(value, 'valuesssssssssssss');
@@ -582,7 +651,93 @@ const FormField: ISwapFormField = {
     });
     /* 监听‘所属项目’END */
 
-    const { dataSource, selectedRowKeys } = this.state;
+    /* 监听‘不含税金额合计 & 含税金额合计’ START */
+    const noAmountTax = form.getFieldInstance('noAmountTax');
+    const noAmountTaxValue = noAmountTax.getValue();
+    noAmountTax.hide();
+    form.onFieldValueChange('noAmountTax', value => {
+      this.setState({
+        Inputmoney2: value,
+      });
+    });
+    const amountTax = form.getFieldInstance('amountTax');
+    const amountTaxValue = amountTax.getValue();
+    amountTax.hide();
+    form.onFieldValueChange('amountTax', value => {
+      this.setState({
+        Inputmoney1: value,
+      });
+    });
+    /* 监听‘不含税金额合计 & 含税金额合计’ END */
+
+    /* 监听‘项目地址’START */
+    const Address = form.getFieldInstance('Address');
+
+    console.log(
+      form.getFieldExtendValue('Address'),
+      form.getFieldValue('Address'),
+      Address.getValue(),
+      'add',
+    );
+    form.onFieldExtendValueChange('Address', value => {
+      console.log(value, 'address');
+    });
+    /* 监听‘项目地址’END */
+
+    /* 监听‘日期区间’START */
+    form.onFieldValueChange('dateRange', value => {
+      console.log(value, '日期区间');
+    });
+    /* 监听‘日期区间’END */
+
+    this.setState({
+      Inputmoney1: amountTaxValue,
+      Inputmoney2: noAmountTaxValue,
+    });
+
+    //TestPurTable
+    // form.onFieldValueChange('TestPurTable', value => {
+    //   console.log(
+    //     value,
+    //     'tableTestPurTableTestPurTableTestPurTableTestPurTableTestPurTableTestPurTable',
+    //   );
+    // });
+  },
+  fieldDidUpdate() {
+    if (!this.props.runtimeProps.viewMode) {
+      const { form } = this.props;
+      const { dataSourceRun, detailname, infourl, Inputmoney1, Inputmoney2 } =
+        this.state;
+      //console.log('发起页：fieldDidUpdate');
+      const editData = {
+        hanmoney: Inputmoney1 ? Number(Inputmoney1) : 0, // 含税金额合计
+        nomoney: Inputmoney2 ? Number(Inputmoney2) : 0, // 不含税金额合计
+        detailname: detailname || '',
+        infourl: infourl || '', // 详情地址
+        detailedData: [...dataSourceRun], //物资明细
+      };
+      if (Inputmoney1) {
+        form.setFieldValue('CaiConMoney', Number(Inputmoney1));
+        form.setFieldExtendValue('CaiConMoney', Number(Inputmoney1));
+      }
+
+      const str1 = `不含税金额合计(元)：${Inputmoney2}\n 含税金额合计(元)：${Inputmoney1}`;
+      const str =
+        detailname + parsePrintString(dataSourceRun, purColumns, str1);
+
+      console.log(str);
+
+      form.setFieldValue('TestPur', str);
+      form.setFieldExtendValue('TestPur', editData);
+    }
+  },
+  fieldRender() {
+    const { form } = this.props;
+    const field = form.getFieldInstance('TestPur');
+    const label = form.getFieldProp('TestPur', 'label');
+    const required = form.getFieldProp('TestPur', 'required');
+
+    const { selectedRowKeys } = this.state;
     const deColumns = [
       {
         title: '物资名称',
@@ -889,35 +1044,46 @@ const FormField: ISwapFormField = {
 
     const onSelect = (keys: React.Key[], info: any) => {
       console.log('Trigger Select', keys, info);
-      const treedata = {
-        type: keys[0],
-        number: '10',
-        page: '1',
-        rk_id: ['-1'],
+      const treedata: NewPage = {
+        type: '',
+        pageSize: 10,
+        page: 1,
+        name: '',
       };
-      this.setState({
-        allData: treedata,
-      });
-      this.asyncSetFieldProps(treedata);
+      this.setState(
+        {
+          allData: treedata,
+        },
+        () => {
+          this.asyncSetFieldProps(treedata);
+        },
+      );
     };
 
     const onExpand = () => {
       //console.log('Trigger Expand');
     };
     const Tabschange = key => {
-      //console.log(key);
-      const newpage = {
-        rk_id: [key],
-        number: '10',
+      const newpage: NewPage = {
+        type: key,
+        pageSize: 10,
         page: 1,
         name: '',
       };
-      this.setState({
-        defaultActiveKey: key,
-        allData: newpage,
-        detdate: key + '1',
-      });
-      this.asyncSetFieldProps(newpage);
+      this.setState(
+        {
+          defaultActiveKey: key,
+          allData: newpage,
+          //   dataSource: [],
+          //   dataSourceRun: [],
+          //   selectedRowKeys: [],
+          //   expandedRowKeys: [],
+          //   childrenRowKeys: [],
+        },
+        () => {
+          this.asyncSetFieldProps();
+        },
+      );
     };
     const rowSelectionMaterial = {
       selectedRowKeys,
@@ -944,26 +1110,34 @@ const FormField: ISwapFormField = {
     const rowSelection = {
       selectedRowKeys,
       onChange: (selectedRowKeys, selectedRows) => {
-        const { name, childrens } = selectedRows[0];
-        const childId = [];
-        let newInputmoney1 = 0;
-        let newInputmoney2 = 0;
+        const { name, childrens, url = '' } = selectedRows[0];
+        const childId: string[] = [];
+        const newDetailname: string = this.methods().returnDetailName(name);
 
+        // let newInputmoney1: number = 0;
+        // let newInputmoney2: number = 0;
         childrens.forEach(item => {
           const { id, amount_tax, no_amount_tax } = item;
           childId.push(id);
-          newInputmoney1 += Number(amount_tax) ? Number(amount_tax) : 0;
-          newInputmoney2 += Number(no_amount_tax) ? Number(no_amount_tax) : 0;
+          //   newInputmoney1 += Number(amount_tax) ? Number(amount_tax) : 0;
+          //   newInputmoney2 += Number(no_amount_tax) ? Number(no_amount_tax) : 0;
         });
-        this.setState({
-          selectedRowKeys,
-          expandedRowKeys: selectedRowKeys,
-          childrenRowKeys: childId,
-          dataSource: childrens,
-          detailname: name,
-          Inputmoney1: newInputmoney1,
-          Inputmoney2: newInputmoney2,
-        });
+
+        this.setState(
+          {
+            selectedRowKeys,
+            expandedRowKeys: selectedRowKeys,
+            childrenRowKeys: childId,
+            dataSource: childrens,
+            detailname: newDetailname,
+            // Inputmoney1: newInputmoney1,
+            // Inputmoney2: newInputmoney2,
+            infourl: url,
+          },
+          () => {
+            this.methods().addSelfTable();
+          },
+        );
 
         // let dtar = '';
         // let url = '';
@@ -990,13 +1164,10 @@ const FormField: ISwapFormField = {
         //   currentSelectDataid: newDataid,
         //   detailname: dtar,
         //   infourl: url,
-
-        //   selectedRowKeys,
-        //   expandedRowKeys: selectedRowKeys,
-        //   childrenRowKeys: [1, 2],
         // });
       },
     };
+
     const onFinish = (values: any) => {
       this.setState({
         msgdata: '1',
@@ -1018,8 +1189,8 @@ const FormField: ISwapFormField = {
       return (
         <Table
           className="childrenTable"
-          columns={myColumsChildren}
-          //   columns={etColumns}
+          scroll={{ x: true }}
+          columns={etColumns.filter(v => v.dataIndex !== 'operation')}
           dataSource={childrens}
           rowKey={record => record.id}
           pagination={false}
@@ -1031,25 +1202,33 @@ const FormField: ISwapFormField = {
               if (selectedRowKeys.length > 0) {
                 const { pId } = selectedRows[0];
                 const { name = '' } = listData.filter(v => v.id === pId)?.[0];
-                const newDataSource = [...dataSource, ...selectedRows];
-                let newInputmoney1 = 0;
-                let newInputmoney2 = 0;
+                const newDetailname: string =
+                  this.methods().returnDetailName(name);
+                const newDataSource: any[] = [...dataSource, ...selectedRows];
 
-                newDataSource.forEach(item => {
-                  const { amount_tax, no_amount_tax } = item;
-                  newInputmoney1 += Number(amount_tax) ? Number(amount_tax) : 0;
-                  newInputmoney2 += Number(no_amount_tax)
-                    ? Number(no_amount_tax)
-                    : 0;
-                });
-                this.setState({
-                  childrenRowKeys: selectedRowKeys,
-                  selectedRowKeys: [pId], // 反选 父级
-                  detailname: name,
-                  dataSource: newDataSource,
-                  Inputmoney1: newInputmoney1,
-                  Inputmoney2: newInputmoney2,
-                });
+                // let newInputmoney1: number = 0;
+                // let newInputmoney2: number = 0;
+                // newDataSource.forEach(item => {
+                //   const { amount_tax, no_amount_tax } = item;
+                //   newInputmoney1 += Number(amount_tax) ? Number(amount_tax) : 0;
+                //   newInputmoney2 += Number(no_amount_tax)
+                //     ? Number(no_amount_tax)
+                //     : 0;
+                // });
+
+                this.setState(
+                  {
+                    childrenRowKeys: selectedRowKeys,
+                    selectedRowKeys: [pId], // 反选 父级
+                    detailname: newDetailname,
+                    dataSource: newDataSource,
+                    // Inputmoney1: newInputmoney1,
+                    // Inputmoney2: newInputmoney2,
+                  },
+                  () => {
+                    this.methods().addSelfTable;
+                  },
+                );
               } else {
                 this.setState({
                   childrenRowKeys: selectedRowKeys,
@@ -1058,7 +1237,6 @@ const FormField: ISwapFormField = {
                   dataSource: [],
                   Inputmoney1: 0,
                   Inputmoney2: 0,
-                  //   expandedRowKeys: []
                 });
               }
             },
@@ -1066,6 +1244,8 @@ const FormField: ISwapFormField = {
         />
       );
     };
+
+    const { detailname } = this.state;
 
     //详情
     if (this.props.runtimeProps.viewMode) {
@@ -1133,6 +1313,7 @@ const FormField: ISwapFormField = {
         </div>
       );
     }
+
     return (
       <div className="TestPurField_class">
         <div className="pc-custom-field-wrap">
@@ -1171,7 +1352,7 @@ const FormField: ISwapFormField = {
               </div>
             </div>
             <SelectBtn
-              title={this.state.detailname}
+              title={detailname}
               initSelect={this.methods().handleProjectAdd}
               resetSelect={this.methods().handleProjectAdd}
               deleteSelect={this.methods().ResetClick}
@@ -1190,7 +1371,7 @@ const FormField: ISwapFormField = {
             /> */}
           </div>
           <div style={{ marginTop: '10px' }}>
-            <Table
+            {/* <Table
               scroll={{ x: '1500px' }}
               components={components}
               className="full-size-editable"
@@ -1199,7 +1380,7 @@ const FormField: ISwapFormField = {
               dataSource={dataSource}
               columns={columns as ColumnTypes}
               pagination={false}
-            />
+            /> */}
             <div
               style={{
                 display: 'flex',
@@ -1266,11 +1447,11 @@ const FormField: ISwapFormField = {
           >
             <Tabs
               className="Tabs_class"
-              defaultActiveKey="a"
+              defaultActiveKey="purchase_Apply_For"
               centered
               onChange={Tabschange}
             >
-              <TabPane tab="采购申请" key="a">
+              <TabPane tab="采购申请" key="purchase_Apply_For">
                 <Search
                   placeholder="请输入"
                   allowClear
@@ -1328,15 +1509,23 @@ const FormField: ISwapFormField = {
                     },
                   }}
                 ></Table>
-                <Pagination
-                  defaultCurrent={1}
-                  total={this.state.total2}
-                  hideOnSinglePage={true}
-                  className="pagination"
-                  onChange={this.methods().handleChangePage}
-                />
+                <PaginationBox>
+                  <Pagination
+                    defaultCurrent={1}
+                    total={this.state.total2}
+                    hideOnSinglePage={true}
+                    className="pagination"
+                    onChange={(page: number, pageSize: number) => {
+                      this.methods().handleChangePage(
+                        page,
+                        pageSize,
+                        'purchase_Apply_For',
+                      );
+                    }}
+                  />
+                </PaginationBox>
               </TabPane>
-              <TabPane tab="材料总计划" key="b">
+              <TabPane tab="材料总计划" key="Material_master_plan">
                 <Search
                   placeholder="请输入"
                   allowClear
@@ -1364,13 +1553,21 @@ const FormField: ISwapFormField = {
                   loading={this.state.loading}
                   pagination={false}
                 ></Table>
-                <Pagination
-                  defaultCurrent={1}
-                  total={this.state.total2}
-                  hideOnSinglePage={true}
-                  className="pagination"
-                  onChange={this.methods().handleChangePage}
-                />
+                <PaginationBox>
+                  <Pagination
+                    defaultCurrent={1}
+                    total={this.state.total2}
+                    hideOnSinglePage={true}
+                    className="pagination"
+                    onChange={(page: number, pageSize: number) => {
+                      this.methods().handleChangePage(
+                        page,
+                        pageSize,
+                        'Material_master_plan',
+                      );
+                    }}
+                  />
+                </PaginationBox>
               </TabPane>
             </Tabs>
           </Modal>

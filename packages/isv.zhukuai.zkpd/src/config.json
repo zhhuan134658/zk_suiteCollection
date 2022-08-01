@@ -8,6 +8,16 @@
   "setters": [],
   "children": [
     {
+      "componentName": "TextField",
+      "bizAlias": "ceshi",
+      "props": {
+        "required": true,
+        "placeholder": "请输入",
+        "label": "ceshi",
+        "maxLength": 10
+      }
+    },
+    {
       "componentName": "SelectField",
       "bizAlias": "Autopro",
       "props": {
@@ -22,13 +32,112 @@
       }
     },
     {
-      "componentName": "TestPurField",
-      "bizAlias": "TestPur",
+      "componentName": "TheirCompanyField",
+      "bizAlias": "theirCompany",
       "props": {
-        "placeholder": "请输入",
-        "label": "采购合同"
+        "required": false,
+        "placeholder": "请选择",
+        "label": "所属分公司"
       },
       "type": "custom"
+    },
+    {
+      "componentName": "TextField",
+      "bizAlias": "company",
+      "props": {
+        "required": true,
+        "placeholder": "请输入",
+        "label": "所属分公司",
+        "maxLength": "100"
+      }
+    },
+    {
+      "componentName": "TheirUnitField",
+      "bizAlias": "theirUnit",
+      "props": {
+        "required": false,
+        "placeholder": "请选择",
+        "label": "建设单位"
+      },
+      "type": "custom"
+    },
+    {
+      "componentName": "TextField",
+      "bizAlias": "unit",
+      "props": {
+        "required": true,
+        "placeholder": "请输入",
+        "label": "建设单位",
+        "maxLength": "100"
+      }
+    },
+
+    {
+      "componentName": "TestCdyField",
+      "bizAlias": "TestCdy",
+      "props": {
+        "required": true,
+        "placeholder": "请输入",
+        "label": "TestCdy"
+      },
+      "type": "custom"
+    },
+    {
+      "componentName": "TextField",
+      "bizAlias": "TestCdyAll",
+      "props": {
+        "required": true,
+        "placeholder": "请输入",
+        "label": "TestCdyAll"
+      }
+    },
+    {
+      "componentName": "TableField",
+      "bizAlias": "TestPurTables",
+      "props": {
+        "actionName": "增加明细",
+        "tableViewMode": "table",
+        "placeholder": "请输入",
+        "label": "明细"
+      },
+      "children": [
+        {
+          "componentName": "TextField",
+          "bizAlias": "name",
+          "props": {
+            "disabled": true,
+            "placeholder": "请输入",
+            "label": "物资名称",
+            "id": "name"
+          }
+        },
+        {
+          "componentName": "NumberField",
+          "bizAlias": "number",
+          "props": {
+            "disabled": false,
+            "placeholder": "请输入",
+            "label": "数量",
+            "id": "number"
+          }
+        }
+      ]
+    },
+    {
+      "componentName": "TextField",
+      "bizAlias": "noAmountTax",
+      "props": {
+        "required": true,
+        "maxLength": "100",
+        "notUpper": "0",
+        "formula": [
+          {
+            "id": "number"
+          }
+        ],
+        "label": "累加计算",
+        "placeholder": "自动计算数值"
+      }
     }
   ]
 }

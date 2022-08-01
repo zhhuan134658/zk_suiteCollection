@@ -2,23 +2,30 @@ import { Table } from 'antd';
 import React, { ReactNode } from 'react';
 import { IFormField } from '..';
 
+interface Keys {
+  [key: string]: any;
+}
+
 interface EditableRowProps {
   index: number;
 }
 
 interface SwapFormField extends IFormField {
   getInitialState: () => any;
+  fieldDidMount?: () => void;
   suiteDidMount?: () => any;
-  handleOk: () => void;
-  handleCancel: () => void;
-  onExtraClick: () => void;
-  onOpenChange: () => void;
-  onCancel: () => void;
-  onSearchBarChange: (value: any) => void;
-  onSubmit: (value: any) => void;
-  habdlClick: (item: any) => void;
-  methods: () => any;
-  asyncSetFieldProps: (data: any, type?: any) => void;
+  handleOk?: () => void;
+  handleCancel?: () => void;
+  onExtraClick?: () => void;
+  onOpenChange?: () => void;
+  onCancel?: () => void;
+  onSearchBarChange?: (value: any) => void;
+  onSubmit?: (value: any) => void;
+  habdlClick?: (item: any) => void;
+  methods?: () => any;
+  renderDetail?: (field?: any, label?: any) => void;
+  asyncSetFieldProps?: (data: any, type?: any) => void;
+  setFieldValues?: (biz?: any, value?: any) => void;
 }
 
 interface Item {
@@ -85,6 +92,20 @@ interface TableCellData {
   value: string | number;
 }
 
+interface NewPage {
+  type: string;
+  pageSize: number;
+  page: number;
+  name: string;
+  supplier_type: string;
+  id?: string | number;
+  project_name?: string;
+  biao_name?: string;
+  unit_name?: string;
+  unit_type?: string;
+  unit_nature?: string;
+}
+
 type EditableTableProps = Parameters<typeof Table>[0];
 
 type ColumnTypes = Exclude<EditableTableProps['columns'], undefined>;
@@ -100,4 +121,7 @@ export {
   TableData,
   TableColumn,
   TableCellData,
+  //
+  NewPage,
+  Keys,
 };

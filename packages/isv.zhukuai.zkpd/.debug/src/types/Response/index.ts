@@ -1,3 +1,6 @@
+interface ArrayObj {
+  [key: string]: any;
+}
 export interface resRefreshData {
   dataList: Array<dataListObjects>;
   schemaList: Array<schemaListObjects>;
@@ -18,9 +21,16 @@ export interface schemaListObjects {
 }
 
 export interface refreshDataResolve {
-  dataArray: any;
-  extendArray: any;
-  currentPage: any;
-  totalCount: any;
-  message: any;
+  dataArray?: any;
+  extendArray?: any;
+  message?: any;
+  page?: number;
+  count?: number;
+  type?: string;
+  list?: ArrayObj[];
+  typeList?: ArrayObj[];
+  pageSize?: number;
+  success?: boolean | undefined;
+  errorMessage?: string;
+  optionNature?: ArrayObj[];
 }

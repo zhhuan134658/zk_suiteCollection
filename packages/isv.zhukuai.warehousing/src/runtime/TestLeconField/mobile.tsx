@@ -2,7 +2,15 @@
 //import { Tree } from 'antd';
 import 'dingtalk-jsapi/entry/union';
 import * as dd from 'dingtalk-jsapi';
-import { Drawer, InputItem, SearchBar, DatePicker, Toast } from 'antd-mobile';
+import {
+  Drawer,
+  InputItem,
+  SearchBar,
+  DatePicker,
+  Toast,
+  List,
+  Pagination,
+} from 'antd-mobile';
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { handleTaxTableStatistics } from '../../components/handleTables';
@@ -19,9 +27,10 @@ import {
 import { DetailList } from '../../components/listDetail';
 import { fpAdd } from '../../utils/fpOperations';
 import { FancyList } from '../../components/fancyLists';
+import './mobile.less';
 const now = new Date();
 
-const FormField: ISwapFormField = {
+const FormField = {
   getInitialState() {
     return {
       infourl: '',
@@ -85,7 +94,7 @@ const FormField: ISwapFormField = {
       showElem2: 'none',
       showElem3: 'none',
       inputvalue: '',
-      allData: { type: '0', number: '99999', page: '1', name: '' },
+      allData: { type: '0', number: 10, page: 1, name: '' },
       listData: [],
       fixedColumn: '',
       materialList: [
@@ -102,6 +111,8 @@ const FormField: ISwapFormField = {
           candidate_list: '',
         },
       ],
+      listH: 0,
+      total: 0,
     };
   },
   handleOk: function (): void {
@@ -185,16 +196,21 @@ const FormField: ISwapFormField = {
           showElem3: 'inherit',
         });
       },
-      onOpenChange(index: any) {
-        console.log('0000001');
-        const newData = _this.state.allData;
-        newData.rk_id = ['-1'];
-        _this.asyncSetFieldProps(newData);
-        _this.setState({
-          showElem: 'inherit',
-          checkindex: index,
-          updateTreeDate: '1',
-        });
+      onOpenChange: (index: any): void => {
+        const { allData } = this.state;
+        Object.assign(allData, { rk_id: ['-1'], name: '' });
+        this.setState(
+          {
+            showElem: 'inherit',
+            checkindex: index,
+            updateTreeDate: '1',
+            allData,
+            SearchBarvalue: '',
+          },
+          () => {
+            this.asyncSetFieldProps();
+          },
+        );
       },
       onOpenChange2(index: any) {
         console.log('0000002');
@@ -464,11 +480,24 @@ const FormField: ISwapFormField = {
   },
   asyncSetFieldProps(data: any, type = 0, updateCascade = true) {
     const _this = this;
-    const promise = asyncSetProps(_this, data, 'TestLecon');
+    const { allData } = this.state;
+    console.log(data, allData, 'allData');
+    const promise = asyncSetProps(_this, data ? data : allData, 'TestLecon');
     promise.then(res => {
-      console.log('1234543=======', res);
-      _this.setState({
-        listData: [...res.dataArray],
+      const { dataArray, totalCount } = res;
+      console.log('1234543=======', dataArray, res);
+      const numYu = totalCount % 10;
+      let total = Math.trunc(totalCount / 10);
+      if (numYu) {
+        total += 1;
+      }
+      if (allData.wz_add) {
+        delete allData.wz_add;
+      }
+      this.setState({
+        listData: dataArray,
+        total,
+        allData,
       });
       const treeArray = [
         {
@@ -508,6 +537,12 @@ const FormField: ISwapFormField = {
       if (res.message) {
         Toast.info(res.message, 1);
       }
+    });
+  },
+  fieldDidMount() {
+    const windowH: number = window.innerHeight;
+    this.setState({
+      listH: windowH - 47,
     });
   },
   fieldDidUpdate() {
@@ -621,59 +656,128 @@ const FormField: ISwapFormField = {
       console.log('selected', selectedKeys, info.node.title);
     };
     const onFinish = (values: any) => {
+      const { allData } = this.state;
       console.log('Success:', values);
       //   const [form] = Form.useForm();
-      const newdate = this.state.allData;
-      newdate.wz_add = values;
-      this.asyncSetFieldProps(newdate);
-      this.setState({
-        popUpVisible: false,
-      });
+      //   const newdate = this.state.allData;
+      //       newdate.wz_add = values;
+      Object.assign(allData, { wz_add: values });
+
+      this.setState(
+        {
+          popUpVisible: false,
+          allData,
+        },
+        () => {
+          this.asyncSetFieldProps();
+        },
+      );
     };
     const onFinishFailed = (errorInfo: any) => {
       console.log('Failed:', errorInfo);
     };
-    const sidebar = (
-      <div style={{ width: '100vw' }}>
-        <SearchBar
-          value={this.state.SearchBarvalue}
-          placeholder="请输入"
-          onSubmit={val => {
-            const _this = this;
-            _this.setState({
-              showTypes: false,
-            });
-            searchBarSubmit(_this, val, 0);
-          }}
-          onChange={val => {
-            const _this = this;
-            searchBarChange(_this, val, 0);
-            if (!val) {
-              _this.setState({
-                showTypes: true,
-              });
-            }
-          }}
-          showCancelButton
-          onCancel={() =>
-            this.setState({ showElem: 'none', SearchBarvalue: '' })
-          }
-        />
-        <HandledDetailDialogMobile
-          cascadeData={this.state.cascadeData}
-          onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
-          showElem={this.state.showElem}
-        />
-        <DetailList
+    const sidebar = () => {
+      const {
+        listData,
+        listH,
+        total = 0,
+        allData,
+        allData: { page },
+        SearchBarvalue,
+      } = this.state;
+      return (
+        <div style={{ width: '100vw', background: '#F2F1F6 ' }}>
+          <SearchBar
+            value={SearchBarvalue}
+            placeholder="请输入"
+            onSubmit={val => {
+              Object.assign(allData, { name: val, page: 1 });
+              this.setState(
+                {
+                  showTypes: false,
+                  allData,
+                },
+                () => {
+                  this.asyncSetFieldProps();
+                },
+              );
+              //   searchBarSubmit(_this, val, 0);
+            }}
+            onChange={val => {
+              const _this = this;
+              searchBarChange(_this, val, 0);
+              if (!val) {
+                _this.setState({
+                  showTypes: true,
+                });
+              }
+            }}
+            showCancelButton
+            onCancel={() => {
+              Object.assign(allData, { name: '', page: 1 });
+              this.setState(
+                { showElem: 'none', SearchBarvalue: '', allData },
+                () => {
+                  this.asyncSetFieldProps();
+                },
+              );
+            }}
+          />
+          <HandledDetailDialogMobile
+            cascadeData={this.state.cascadeData}
+            onFinish={onFinish}
+            onFinishFailed={onFinishFailed}
+            showElem={this.state.showElem}
+            positionStyle={{ bottom: '70px' }}
+          />
+          {/* <DetailList
           cascadeData={this.state.cascadeData}
           rightListData={this.state.listData}
           showTypes={this.state.showTypes}
           sideChange={this.methods().sideChange}
           itemClick={this.methods().handleClick.bind(this)}
-        />
-      </div>
-    );
+        /> */}
+          <List
+            className="listBox"
+            style={{
+              height: listH ? listH - 5 - 49 : 0,
+              marginTop: '5px',
+            }}
+          >
+            {listData.map((item, index) => {
+              // const { unit_name } = item;
+              const { name = '-', size = '-', unit = '-' } = item;
+              const str = `${name}/${size}/${unit}`;
+              return (
+                <List.Item
+                  onClick={this.methods().handleClick.bind(this, item)}
+                  key={index}
+                  multipleLine
+                >
+                  {str}
+                </List.Item>
+              );
+            })}
+          </List>
+          <Pagination
+            total={total}
+            current={page}
+            onChange={page => {
+              Object.assign(allData, { page });
+              console.log(page, 'eeeeee');
+              this.setState(
+                {
+                  allData,
+                },
+                () => {
+                  this.asyncSetFieldProps();
+                },
+              );
+            }}
+          />
+        </div>
+      );
+    };
     const checkdebar = (
       <div style={{ width: '100vw' }}>
         <SearchBar
@@ -1266,7 +1370,7 @@ const FormField: ISwapFormField = {
                 textAlign: 'center',
                 paddingTop: 42,
               }}
-              sidebar={sidebar}
+              sidebar={sidebar()}
               onOpenChange={this.methods().onOpenChange}
             ></Drawer>,
             document.getElementById('MF_APP'),

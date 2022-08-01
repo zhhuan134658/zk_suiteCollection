@@ -61,6 +61,52 @@ const myColumns = [
     dataIndex: 'reply_money',
   },
 ];
+
+const myColumns1 = [
+  {
+    title: (
+      <div>
+        名称
+        {/* <Tooltip
+          placement="top"
+          title={
+            <div>
+              <span>灰色字体为已关联过选项</span>
+            </div>
+          }
+        >
+          <QuestionCircleOutlined />
+        </Tooltip> */}
+      </div>
+    ),
+    dataIndex: 'name',
+    render: (_, record: any) => {
+      let text = record.xuan === 1 ? '#000000' : '#000000';
+      let style = {
+        color: text,
+      };
+      return (
+        <Tooltip placement="topLeft" title={record.name}>
+          <span style={style}>{record.name}</span>
+        </Tooltip>
+      );
+    },
+  },
+  {
+    title: '分包单位',
+    dataIndex: 'sub_unit',
+    render: (_, record: any) => (
+      <Tooltip placement="topLeft" title={record.sub_unit}>
+        <span>{record.sub_unit}</span>
+      </Tooltip>
+    ),
+  },
+  {
+    title: '合同金额',
+    dataIndex: 'contract_money',
+  },
+];
+
 const FormField: ISwapFormField = {
   getInitialState() {
     return {
@@ -466,7 +512,9 @@ const FormField: ISwapFormField = {
                 ...rowSelection,
               }}
               rowKey={record => record.id}
-              columns={myColumns}
+              columns={
+                this.state.defaultActiveKey === 'd' ? myColumns1 : myColumns
+              }
               dataSource={this.state.listData}
               loading={this.state.loading}
               pagination={false}

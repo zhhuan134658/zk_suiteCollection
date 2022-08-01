@@ -21,7 +21,7 @@ const myColumns = [
   {
     title: (
       <div>
-        结算名称
+        合同名称
         {/* <Tooltip
           placement="top"
           title={
@@ -35,6 +35,7 @@ const myColumns = [
       </div>
     ),
     dataIndex: 'name',
+    ellipsis: true,
     render: (_, record: any) => {
       const text = record.xuan === 1 ? '#000000' : '#000000';
       const style = {
@@ -50,16 +51,19 @@ const myColumns = [
   {
     title: '所属项目',
     dataIndex: 'project_name',
+    ellipsis: true,
   },
 
   {
     title: '供应商',
     dataIndex: 'supplier',
+    ellipsis: true,
   },
 
   {
     title: '合同金额',
     dataIndex: 'contract_money',
+    ellipsis: true,
   },
 ];
 const myColumnsb = [
@@ -405,7 +409,7 @@ const FormField: ISwapFormField = {
         if (this.state.detdate === 'a1') {
           dtar = '其他支出合同-' + newData[0].name;
         } else if (this.state.detdate === 'b1') {
-          dtar = '结算-' + newData[0].name;
+          dtar = '其他支出结算-' + newData[0].name;
         }
         form.setFieldValue(
           'OtherZhiConname',
@@ -497,7 +501,7 @@ const FormField: ISwapFormField = {
               onChange={Tabschange}
             >
               <TabPane tab="其他支出合同" key="a"></TabPane>
-              <TabPane tab="结算" key="b"></TabPane>
+              <TabPane tab="其他支出结算" key="b"></TabPane>
             </Tabs>
             <Search
               placeholder="请输入"

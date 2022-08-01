@@ -7,29 +7,30 @@ const FormField: ISwapFormField = {
   getInitialState() {
     return {
       options: [],
-      current_page: '', //当前页
-      total2: '',
-      allData: { type: '0', number: '10', page: '1', name: '' },
+      current_page: '',
+      total: '',
+      allData: { type: '0', pageSize: '10', page: '1', name: '' },
       isModalVisible: false,
       listData: [],
     };
   },
   fieldDidMount() {
-    const newData = this.state.allData;
-    this.asyncSetFieldProps(newData);
+    this.asyncSetFieldProps();
   },
-  asyncSetFieldProps(data: any) {
+  asyncSetFieldProps(data?: any) {
     const _this = this;
-    const promise = asyncSetProps(_this, data, 'PositionDes');
+    const { allData, msgdata } = this.state;
+    const promise = asyncSetProps(_this, allData, 'PositionDes');
     promise.then(res => {
+      const { dataArray, page, count, message } = res;
       _this.setState({
-        options: [...res.dataArray],
-        current_page: res.currentPage,
-        total2: res.totalCount,
+        options: [...dataArray],
+        current_page: page,
+        total: count,
       });
-      if (_this.state.msgdata === '1') {
+      if (msgdata === '1') {
         notification.open({
-          message: res.message,
+          message,
         });
         _this.setState({
           msgdata: '0',
@@ -82,8 +83,11 @@ const FormField: ISwapFormField = {
     });
   },
   fieldRender() {
-    const { form, runtimeProps } = this.props;
-    const { viewMode } = runtimeProps;
+    const {
+      form,
+      runtimeProps: { viewMode },
+    } = this.props;
+    // const { viewMode } = runtimeProps;
 
     const field = form.getFieldInstance('PositionDes');
     const label = form.getFieldProp('PositionDes', 'label');
@@ -122,6 +126,24 @@ const FormField: ISwapFormField = {
         </div>
       </div>
     );
+  },
+  onExtraClick: function (): void {
+    throw new Error('Function not implemented.');
+  },
+  onOpenChange: function (): void {
+    throw new Error('Function not implemented.');
+  },
+  onCancel: function (): void {
+    throw new Error('Function not implemented.');
+  },
+  onSearchBarChange: function (value: any): void {
+    throw new Error('Function not implemented.');
+  },
+  onSubmit: function (value: any): void {
+    throw new Error('Function not implemented.');
+  },
+  habdlClick: function (item: any): void {
+    throw new Error('Function not implemented.');
   },
 };
 

@@ -345,8 +345,8 @@ const DetailDialogDesktop: React.FC<{
 };
 
 interface SupplierForm {
-  name: string;
-  supplier_type: string;
+  unit_name: string;
+  unit_type: string;
   unit_nature: string;
 }
 
@@ -354,16 +354,22 @@ const SupplierMobileDialog: React.FC<{
   onFinish: (values: SupplierForm) => void;
   onFinishFailed: (error: any) => void;
   supplierTypes: Array<any>;
+  optionNature?: any[];
 }> = props => {
-  const { onFinish, onFinishFailed, supplierTypes } = props;
+  const {
+    onFinish,
+    onFinishFailed,
+    supplierTypes = [],
+    optionNature = [],
+  } = props;
   const [visible, setVisible] = React.useState(false);
   const [pickerVisible, setPickerVisible] = React.useState(false);
   const [naturePickerVisible, setNaturePickerVisible] = React.useState(false);
   const [pickerValue, setPickerValue] = React.useState([]);
   const [naturePickerValue, setNaturePickerValue] = React.useState([]);
   const [formData, setFormData] = React.useState({
-    name: '',
-    supplier_type: '',
+    unit_name: '',
+    unit_type: '',
     unit_nature: '',
   });
   const pickerDataRender = (pickerData: Array<any>) => {
@@ -383,25 +389,28 @@ const SupplierMobileDialog: React.FC<{
     ],
   ];
   const wrappedFinish = (values: {
-    name: string;
-    supplier_type: string;
+    unit_name: string;
+    unit_type: string;
     unit_nature: string;
   }) => {
     const parsedValues = {
-      name: '',
-      supplier_type: '',
+      unit_name: '',
+      unit_type: '',
       unit_nature: '',
     };
-    if (values['supplier_type'].length > 0) {
-      parsedValues.supplier_type = values['supplier_type'][0];
+    if (values['unit_type'].length > 0) {
+      parsedValues.unit_type = values['unit_type'][0];
     }
     if (values['unit_nature'].length > 0) {
       parsedValues.unit_nature = values['unit_nature'][0];
     }
-    parsedValues.name = values.name;
+    parsedValues.unit_name = values.unit_name;
     console.log('WRAPPED FINISH', values);
-    onFinish(parsedValues);
-    setVisible(false);
+    const { unit_name, unit_type, unit_nature } = parsedValues;
+    if (unit_name && unit_type && unit_nature) {
+      onFinish(parsedValues);
+      setVisible(false);
+    }
   };
   const wrappedFinishFailed = (error: any) => {
     onFinishFailed(error);
@@ -468,8 +477,8 @@ const SupplierMobileDialog: React.FC<{
               placeholder="请填写单位名称"
               onChange={val =>
                 setFormData({
-                  name: val,
-                  supplier_type: formData.supplier_type,
+                  unit_name: val,
+                  unit_type: formData.unit_type,
                   unit_nature: formData.unit_nature,
                 })
               }
@@ -491,8 +500,8 @@ const SupplierMobileDialog: React.FC<{
               onOk={value => {
                 setPickerValue(value);
                 setFormData({
-                  name: formData.name,
-                  supplier_type: value,
+                  unit_name: formData.unit_name,
+                  unit_type: value,
                   unit_nature: formData.unit_nature,
                 });
                 setPickerVisible(false);
@@ -509,7 +518,7 @@ const SupplierMobileDialog: React.FC<{
               </List.Item>
             </Picker>
             <Picker
-              data={natures}
+              data={optionNature}
               cascade={false}
               extra="请选择 "
               visible={naturePickerVisible}
@@ -522,9 +531,9 @@ const SupplierMobileDialog: React.FC<{
               onOk={value => {
                 setNaturePickerValue(value);
                 setFormData({
-                  name: formData.name,
+                  unit_name: formData.unit_name,
                   unit_nature: value,
-                  supplier_type: formData.supplier_type,
+                  unit_type: formData.unit_type,
                 });
                 setNaturePickerVisible(false);
                 console.log('onOk', value);
@@ -533,7 +542,6 @@ const SupplierMobileDialog: React.FC<{
               <List.Item
                 onClick={() => {
                   setNaturePickerVisible(true);
-                  console.log(natures);
                 }}
               >
                 <span>单位性质</span>
